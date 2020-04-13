@@ -440,7 +440,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
     if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
-        (el->getGenMatch() > 2 && el->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
+        !(el->getGenMatch() == 5 && t->getGenMatch() == 5)) {
         contamination = 1;  // mc contaminating embedded samples
     }
     cross_trigger = evt->getPassCrossTrigger(el->getPt());
@@ -478,7 +478,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
     if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
-        (mu->getGenMatch() > 2 && mu->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
+        !(mu->getGenMatch() == 5 && t->getGenMatch() == 5)) {
         contamination = 1;  // mc contaminating embedded samples
     }
     cross_trigger = evt->getPassCrossTrigger(mu->getPt());
