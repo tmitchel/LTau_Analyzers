@@ -75,13 +75,15 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
     if syst != None:
-        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name] dr['lep_dr'],
+                                      df['met'], df['njets'], df['cross_trigger'],
                                       fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_w'][category].GetBinContent(xbin, ybin),
                                       syst[0], syst[1])
     else:
-        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name] dr['lep_dr'],
+                                      df['met'], df['njets'], df['cross_trigger'],
                                       fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_w'][category].GetBinContent(xbin, ybin))
@@ -141,7 +143,7 @@ def main(args):
     channel_prefix = tree_name[:2]
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
-    fake_file = '/hdfs/store/user/tmitchel/deep-tau-fake-factor/ff_files_{}_{}/'.format(channel_prefix, args.year)
+    fake_file = '/hdfs/store/user/tmitchel/HTT_FakeFactors/ff_files_{}_{}/'.format(channel_prefix, args.year)
     ff_weighter = FFApplicationTool(fake_file, channel_prefix)
     for cat in categories:
         fout.cd()
