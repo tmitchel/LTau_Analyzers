@@ -27,7 +27,7 @@ systs_names = [
 systs = [(name, 'up') for name in systs_names] + [(name, 'down') for name in systs_names]
 
 filling_variables = [
-    't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt',
+    't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt', 'lep_dr', 'met',
     'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
 ]
 
@@ -75,14 +75,14 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
     if syst != None:
-        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name] dr['lep_dr'],
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['lep_dr'],
                                       df['met'], df['njets'], df['cross_trigger'],
                                       fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_w'][category].GetBinContent(xbin, ybin),
                                       syst[0], syst[1])
     else:
-        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name] dr['lep_dr'],
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['lep_dr'],
                                       df['met'], df['njets'], df['cross_trigger'],
                                       fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
