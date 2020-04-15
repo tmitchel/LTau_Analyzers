@@ -441,7 +441,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
-    if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
+    if ((name == "ZTT" || name == "TTT" || name == "STT" || name == "VVT") &&
         !(el->getGenMatch() == 5 && t->getGenMatch() == 5)) {
         contamination = 1;  // mc contaminating embedded samples
     }
@@ -480,7 +480,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
-    if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
+    if ((name == "ZTT" || name == "TTT" || name == "STT" || name == "VVT") &&
         !(mu->getGenMatch() == 5 && t->getGenMatch() == 5)) {
         contamination = 1;  // mc contaminating embedded samples
     }
