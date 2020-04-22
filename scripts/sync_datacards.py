@@ -137,7 +137,9 @@ def main(args):
         config = config[args.config]
         vis_mass_bins = config['vis_mass_bins']
         other_bin = config['other_bin']
-        jdphi_bins = config['jdphi_bins']
+        vbf_cat_x_var, vbf_cat_x_bins = config['vbf_cat_x_bins']
+        vbf_cat_y_var, vbf_cat_y_bins = config['vbf_cat_y_bins']
+        vbf_cat_edge_var, vbf_cat_edges = config['vbf_cat_edges']
 
     filelist = build_filelist(args.input_dir)
     assert len(filelist['nominal']) > 0, 'could\'nt locate any nominal files'
@@ -258,9 +260,9 @@ def main(args):
             boost_hist = fill_hists(boosted_events, boost_hist, 'm_sv', 't1_eta', fake_weight=fweight)
 
             output_file.cd('{}_vbf'.format(channel_prefix))
-            vbf_hist = build_histogram(name, vis_mass_bins, jdphi_bins, boilerplate["powheg_map"])
-            vbf_hist = fill_hists(vbf_events, vbf_hist, 'm_sv',
-                                  'dPhijj', fake_weight=fweight)
+            vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"])
+            vbf_hist = fill_hists(vbf_events, vbf_hist,  vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
+                                  edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus'])
 
             # # vbf sub-categories event after normal vbf categories
             # vbf_cat_hists = []
