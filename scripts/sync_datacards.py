@@ -251,15 +251,15 @@ def main(args):
             # start with 0-jet category
             output_file.cd('{}_0jet'.format(channel_prefix))
             zero_jet_hist = build_histogram(name, vis_mass_bins, other_bin, boilerplate["powheg_map"])
-            fill_hists(zero_jet_events, zero_jet_hist, 'vis_mass', 't1_eta', fake_weight=fweight)
+            fill_hists(zero_jet_events, zero_jet_hist, 'm_sv', 't1_eta', fake_weight=fweight)
 
             output_file.cd('{}_boosted'.format(channel_prefix))
             boost_hist = build_histogram(name, vis_mass_bins, other_bin, boilerplate["powheg_map"])
-            boost_hist = fill_hists(boosted_events, boost_hist, 'vis_mass', 't1_eta', fake_weight=fweight)
+            boost_hist = fill_hists(boosted_events, boost_hist, 'm_sv', 't1_eta', fake_weight=fweight)
 
             output_file.cd('{}_vbf'.format(channel_prefix))
             vbf_hist = build_histogram(name, vis_mass_bins, jdphi_bins, boilerplate["powheg_map"])
-            vbf_hist = fill_hists(vbf_events, vbf_hist, 'vis_mass',
+            vbf_hist = fill_hists(vbf_events, vbf_hist, 'm_sv',
                                   'dPhijj', fake_weight=fweight)
 
             # # vbf sub-categories event after normal vbf categories

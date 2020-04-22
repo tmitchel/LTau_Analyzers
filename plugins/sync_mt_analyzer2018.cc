@@ -262,6 +262,12 @@ int main(int argc, char *argv[]) {
         double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
 
         // now do mt selection
+        if (mt < 50) {
+            histos->at("cutflow")->Fill(5., 1.);
+        } else {
+            continue;
+        }
+
         if (tau.getAgainstVVLooseElectronDeep() > 0) {
             histos->at("cutflow")->Fill(5., 1.);
         } else {
