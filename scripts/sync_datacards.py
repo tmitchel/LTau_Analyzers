@@ -88,12 +88,12 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
                     if DCP_idx == None:
                         hists[j].Fill(xvar[i], yvar[i], evtwt[i])
                     else:
-                        if dcp[i] < -0.5:
+                        if dcp[i] < -0.3:
                             hists[j].Fill(xvar[i], yvar[i], evtwt[i])
                         elif dcp[i] < 0.:
                             # DCP minus bins are offset by DCP_idx
                             hists[j+DCP_idx].Fill(xvar[i], yvar[i], evtwt[i])
-                        elif dcp[i] < 0.5:
+                        elif dcp[i] < 0.3:
                             hists[j+(2*DCP_idx)].Fill(xvar[i], yvar[i], evtwt[i])
                         else:
                             hists[j+(3*DCP_idx)].Fill(xvar[i], yvar[i], evtwt[i])
