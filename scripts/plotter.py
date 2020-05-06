@@ -30,6 +30,7 @@ style_map = {
     "signals": {
         "ggh125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "reweighted_ggH_htt_0PM125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
+        "reweighted_ggH_htt_0Mf05ph0125": style_map_tuple(no_color, GetColor("#AA00FF"), 1, 3, 1),
         "reweighted_ggH_htt_0M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
@@ -128,6 +129,7 @@ def fillLegend(data, backgrounds, signals, stat):
     # signals
     leg.AddEntry(signals['reweighted_ggH_htt_0PM125'], 'ggH SM Higgs(125)x50', 'l')
     leg.AddEntry(signals['reweighted_ggH_htt_0M125'], 'ggH PS Higgs(125)x50', 'l')
+    leg.AddEntry(signals['reweighted_ggH_htt_0Mf05ph0125'], 'ggH Mix Higgs(125)x50', 'l')
 
     leg.AddEntry(signals['reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
     leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
@@ -277,6 +279,7 @@ def BuildPlot(args):
         if 'ggH' in sig_name:
             sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
         if 'qqH' in sig_name:
+            continue
             sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
         sig_hist.Draw('same hist')
 
