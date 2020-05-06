@@ -88,11 +88,15 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
                     if DCP_idx == None:
                         hists[j].Fill(xvar[i], yvar[i], evtwt[i])
                     else:
-                        if dcp[i] > 0:
+                        if dcp[i] < -0.5:
                             hists[j].Fill(xvar[i], yvar[i], evtwt[i])
-                        else:
+                        elif dcp[i] < 0.:
                             # DCP minus bins are offset by DCP_idx
                             hists[j+DCP_idx].Fill(xvar[i], yvar[i], evtwt[i])
+                        elif dcp[i] < 0.5:
+                            hists[j+(2*DCP_idx)].Fill(xvar[i], yvar[i], evtwt[i])
+                        else:
+                            hists[j+(3*DCP_idx)].Fill(xvar[i], yvar[i], evtwt[i])
                     break
         else:
             hists.Fill(xvar[i], yvar[i], evtwt[i])
@@ -162,7 +166,8 @@ def main(args):
     # create structure within output file
     vbf_categories = []
     if 'D0_' in vbf_cat_edge_var:
-        vbf_categories += boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']
+        vbf_categories += boilerplate['vbf_sub_cats_minus1'] + boilerplate['vbf_sub_cats_minus2'] + \
+            boilerplate['vbf_sub_cats_plus1'] + boilerplate['vbf_sub_cats_plus2']
     else:
         vbf_categories += boilerplate['vbf_sub_cats']
 
@@ -277,7 +282,7 @@ def main(args):
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
                 vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"]))
             fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                       edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                       edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus1']))
 
             output_file.Write()
 
