@@ -42,6 +42,38 @@
         "vbf_ggHMELA_bin9_DCPm",  "vbf_ggHMELA_bin10_DCPm",
         "vbf_ggHMELA_bin11_DCPm", "vbf_ggHMELA_bin12_DCPm"
     ],
+    "vbf_sub_cats_plus1": [
+        "vbf_ggHMELA_bin1_DCPp1",  "vbf_ggHMELA_bin2_DCPp1",
+        "vbf_ggHMELA_bin3_DCPp1",  "vbf_ggHMELA_bin4_DCPp1",
+        "vbf_ggHMELA_bin5_DCPp1",  "vbf_ggHMELA_bin6_DCPp1",
+        "vbf_ggHMELA_bin7_DCPp1",  "vbf_ggHMELA_bin8_DCPp1",
+        "vbf_ggHMELA_bin9_DCPp1",  "vbf_ggHMELA_bin10_DCPp1",
+        "vbf_ggHMELA_bin11_DCPp1", "vbf_ggHMELA_bin12_DCPp1"
+    ],
+    "vbf_sub_cats_minus1": [
+        "vbf_ggHMELA_bin1_DCPm1",  "vbf_ggHMELA_bin2_DCPm1",
+        "vbf_ggHMELA_bin3_DCPm1",  "vbf_ggHMELA_bin4_DCPm1",
+        "vbf_ggHMELA_bin5_DCPm1",  "vbf_ggHMELA_bin6_DCPm1",
+        "vbf_ggHMELA_bin7_DCPm1",  "vbf_ggHMELA_bin8_DCPm1",
+        "vbf_ggHMELA_bin9_DCPm1",  "vbf_ggHMELA_bin10_DCPm1",
+        "vbf_ggHMELA_bin11_DCPm1", "vbf_ggHMELA_bin12_DCPm1"
+    ],
+    "vbf_sub_cats_plus2": [
+        "vbf_ggHMELA_bin1_DCPp2",  "vbf_ggHMELA_bin2_DCPp2",
+        "vbf_ggHMELA_bin3_DCPp2",  "vbf_ggHMELA_bin4_DCPp2",
+        "vbf_ggHMELA_bin5_DCPp2",  "vbf_ggHMELA_bin6_DCPp2",
+        "vbf_ggHMELA_bin7_DCPp2",  "vbf_ggHMELA_bin8_DCPp2",
+        "vbf_ggHMELA_bin9_DCPp2",  "vbf_ggHMELA_bin10_DCPp2",
+        "vbf_ggHMELA_bin11_DCPp2", "vbf_ggHMELA_bin12_DCPp2"
+    ],
+    "vbf_sub_cats_minus2": [
+        "vbf_ggHMELA_bin1_DCPm2",  "vbf_ggHMELA_bin2_DCPm2",
+        "vbf_ggHMELA_bin3_DCPm2",  "vbf_ggHMELA_bin4_DCPm2",
+        "vbf_ggHMELA_bin5_DCPm2",  "vbf_ggHMELA_bin6_DCPm2",
+        "vbf_ggHMELA_bin7_DCPm2",  "vbf_ggHMELA_bin8_DCPm2",
+        "vbf_ggHMELA_bin9_DCPm2",  "vbf_ggHMELA_bin10_DCPm2",
+        "vbf_ggHMELA_bin11_DCPm2", "vbf_ggHMELA_bin12_DCPm2"
+    ],
     "jhu_ac_reweighting_map": {
         "ggh": [
             ["wt_ggh_a1", "reweighted_ggH_htt_0PM125"], ["wt_ggh_a3", "reweighted_ggH_htt_0M125"],
