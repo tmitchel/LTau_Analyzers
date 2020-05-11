@@ -59,7 +59,7 @@ def getNames(sample):
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
-    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
+    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc', 'minlo']
     for sample in invalid_samples:
         if sample in ifile:
             return False
@@ -116,6 +116,9 @@ def getSyst(name, signal_type, exe, doSyst):
                     'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
                     'efaket_es_barrel_DM1_Up', 'efaket_es_barrel_DM1_Down',
                     'efaket_es_endcap_DM1_Up', 'efaket_es_endcap_DM1_Down',
+                    'efaket_norm_pt30to40_Up', 'efaket_norm_pt30to40_Down',
+                    'efaket_norm_pt40to50_Up', 'efaket_norm_pt40to50_Down',
+                    'efaket_norm_ptgt50_Up', 'efaket_norm_ptgt50_Down',
                 ]
         elif '_mt' in exe:
             # tau id vsMu systematics
@@ -153,17 +156,15 @@ def getSyst(name, signal_type, exe, doSyst):
         ]
         if '2016' in exe or '2017' in exe:
             systs += ['prefiring_up', 'prefiring_down']
-        systs += [
-            'single_trigger_up', 'single_trigger_down',
-            'cross_trigger_up', 'cross_trigger_down',
-        ]
     else:
-        systs += [
-            'single_trigger_up', 'single_trigger_down',
-            'cross_trigger_up', 'cross_trigger_down',
-        ]
+        systs += ['tracking_up', 'tracking_down']
 
-    if name == 'TTT':
+    systs += [
+        'single_trigger_up', 'single_trigger_down',
+        'cross_trigger_up', 'cross_trigger_down',
+    ]
+
+    if name == 'TTT' or name == 'TTL':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
     if name == 'ZL' or name == 'ZTT':
@@ -341,6 +342,7 @@ def main(args):
             tosample = ifile.replace(sample+suffix, '')
 
             names, signal_type = getNames(sample)
+            # if signal_type != "None": continue
             callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 

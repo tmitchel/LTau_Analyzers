@@ -99,7 +99,7 @@ def main(args):
     ]
     signals = [
         'ggh125_JHU', 'vbf125_JHU', 'wh125_JHU', 'zh125_JHU',
-        'ggh125_madgraph', 'ggh125_minlo',
+        'ggh125_madgraph',
         'ggh125_powheg', 'vbf125_powheg', 'zh125_powheg'
     ]
     bkg_hadd_list = {
@@ -128,8 +128,14 @@ def main(args):
             'signal': sig_hadd_list
         }, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
-    do_hadd(bkg_hadd_list, args.path)
-    do_hadd(sig_hadd_list, args.path)
+    full_hadd_list = bkg_hadd_list
+    for isyst, samples in sig_hadd_list.iteritems():
+        for sample, files in samples.iteritems():
+            full_hadd_list[isyst][sample] = files
+
+    do_hadd(full_hadd_list, args.path)
+    # do_hadd(bkg_hadd_list, args.path)
+    # do_hadd(sig_hadd_list, args.path)
     # rename_wh_zh(sig_hadd_list, args.path)
 
 

@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     std::string original = sample;
     if (name == "VBF125") {
         sample = "vbf125";
-    } else if (name == "ggH125") {
+    } else if (name == "ggH125" && signal_type != "madgraph") {
         sample = "ggh125";
     } else if (name == "WH125") {
         sample = "wh125";
@@ -125,8 +125,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
-        gen_number = 1.;
-    } else if (signal_type == "madgraph") {
         gen_number = 1.;
     }
 
@@ -421,6 +419,16 @@ int main(int argc, char *argv[]) {
                 evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
             }
 
+            auto efake_pt_shift(1.);
+            if (syst.find("efaket_norm_ptgt50") != std::string::npos && tau.getPt() > 50) {
+                efake_pt_shift = (syst == "efaket_norm_ptgt50_Up" ? 1.1 : 0.9);
+            } else if (syst.find("efaket_norm_pt40to50") != std::string::npos && tau.getPt() > 40) {
+                efake_pt_shift = (syst == "efaket_norm_pt40to50_Up" ? 1.1 : 0.9);
+            } else if (syst.find("efaket_norm_pt30to40") != std::string::npos && tau.getPt() > 30) {
+                efake_pt_shift = (syst == "efaket_norm_pt30to40_Up" ? 1.1 : 0.9);
+            }
+            evtwt *= efake_pt_shift;
+
             // handle reading different m_sv values
             if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
                 (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
@@ -438,7 +446,13 @@ int main(int argc, char *argv[]) {
             evtwt *= genweight;
 
             // tracking sf
-            evtwt *= helper->embed_tracking(tau.getDecayMode());
+            if (syst == "tracking_up") {
+                evtwt *= helper->embed_tracking(tau.getDecayMode(), 1);
+            } else if (syst == "tracking_down") {
+                evtwt *= helper->embed_tracking(tau.getDecayMode(), -1);
+            } else {
+                evtwt *= helper->embed_tracking(tau.getDecayMode());
+            }
 
             // set workspace variables
             htt_sf->var("e_pt")->setVal(electron.getPt());

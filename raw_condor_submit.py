@@ -13,10 +13,12 @@ def submit_command(jobName, job_configs, dryrun=False):
 
     exe_dir = '{}/executables'.format(head_dir)
     os.system('mkdir -p {}'.format(exe_dir))
-    os.system('mkdir -p {}/logs'.format(exe_dir))
 
     config_dir = '{}/configs'.format(head_dir)
     os.system('mkdir -p {}'.format(config_dir))
+
+    log_dir = '{}/logs'.format(head_dir)
+    os.system('mkdir -p {}'.format(log_dir))
 
     config_name = '{}/config.jdl'.format(config_dir)
     condorConfig = '''universe = vanilla
@@ -24,17 +26,17 @@ Executable = {2}/overlord.sh
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
 Requirements = (MY.RequiresSharedFS=!=true || TARGET.HasAFS_OSG) && (TARGET.OSG_major =!= undefined || TARGET.IS_GLIDEIN=?=true) && (TARGET.HasParrotCVMFS=?=true || (TARGET.CMS_CVMFS_Exists && TARGET.CMS_CVMFS_Revision >= 89991 )) && TARGET.HAS_CMS_HDFS
-request_memory       = 7000
+request_memory       = 9000
 request_disk         = 2048000
 request_cpus         = 1
 Transfer_Input_Files = {2},{3}
-Output = {1}/logs/sleep_$(Cluster)_$(Process).stdout
-Error = {1}/logs/sleep_$(Cluster)_$(Process).stderr
-Log = {1}/logs/sleep_$(Cluster)_$(Process).log
+Output = {1}/out_$(Cluster)_$(Process).out
+Error = {1}/run_$(Cluster)_$(Process).err
+Log = {1}/running_$(Cluster).log
 x509userproxy = /tmp/x509up_u23269
 Arguments=$(process)
 Queue {0}
-    '''.format(len(job_configs), exe_dir, exe_dir, config_dir)
+    '''.format(len(job_configs), log_dir, exe_dir, config_dir)
     with open(config_name, 'w') as file:
         file.write(condorConfig)
 
@@ -44,6 +46,7 @@ Queue {0}
     overloardScript = '''#!/bin/bash
 let "sample=${{1}}"
 array=($(ls executables/))
+echo ./executables/"${{array[${{sample}}]}}"
 bash ./executables/"${{array[${{sample}}]}}"
     '''.format(exe_dir)
     with open(overlord_name, 'w') as file:
@@ -52,7 +55,7 @@ bash ./executables/"${{array[${{sample}}]}}"
     print 'Condor overlord has been written: {}'.format(overlord_name)
 
     # create tarball with user code
-    os.system('tar --exclude="Output" --exclude="logs" -czf ana_code.tar.gz *')
+    os.system('tar --exclude="Output" --exclude="logs" --exclude="neural-network" --exclude="tmp" -czf ana_code.tar.gz *')
     os.system('mv -v ana_code.tar.gz {}'.format(config_dir))
 
     bashScriptSetup = '''#!/bin/bash
