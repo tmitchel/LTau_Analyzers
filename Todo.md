@@ -1,7 +1,7 @@
 # To-Do List
 
 - [ ] VBF theory uncertainty
-- [ ] ttbar contamination uncertainty
+- [x] ttbar contamination uncertainty
 - [ ] 2017 MadGraph samples
 - [ ] additional 2016 ttbar uncertainty
-- [ ] tau pT normalization uncertainty
+- [x] tau pT normalization uncertainty
