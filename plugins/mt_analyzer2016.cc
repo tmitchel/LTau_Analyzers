@@ -12,6 +12,7 @@
 #include "RooRealVar.h"
 #include "RooWorkspace.h"
 #include "TFile.h"
+#include "TF1.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1D.h"
 #include "TH2F.h"
@@ -160,6 +161,10 @@ int main(int argc, char *argv[]) {
         mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
+
+    // top pT tune correction
+    TFile top_tune_corr_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/toppt_correction_to_2016.root");
+    TF1 *top_tune_corr = reinterpret_cast<TF1*>(top_tune_corr_file.Get("toppt_ratio_to_2016"));
 
     TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -402,6 +407,8 @@ int main(int argc, char *argv[]) {
                 } else {
                     evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));  // √[e^(..)*e^(..)]
                 }
+                // correction for different tune in 2016
+                evtwt *= ((1./top_tune_corr->Eval(pt_top1)) * (1./top_tune_corr->Eval(pt_top2)));
             }
 
             // ggH theory uncertainty
