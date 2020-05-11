@@ -105,6 +105,7 @@ class tau_factory {
     Float_t tTightDeepTau2017v2p1VSe, tVVLooseDeepTau2017v2p1VSe, tVVVLooseDeepTau2017v2p1VSe, tTightDeepTau2017v2p1VSmu, tVLooseDeepTau2017v2p1VSmu;
     Float_t tVVVLooseDeepTau2017v2p1VSjet, tVLooseDeepTau2017v2p1VSjet, tLooseDeepTau2017v2p1VSjet, tMediumDeepTau2017v2p1VSjet,
         tTightDeepTau2017v2p1VSjet, tVTightDeepTau2017v2p1VSjet, tVVTightDeepTau2017v2p1VSjet, deepiso_2;
+    Float_t tes_syst_up, tes_syst_down, ftes_syst_up, ftes_syst_down;
 
  public:
     tau_factory(TTree*, int, std::string);
@@ -151,6 +152,10 @@ tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era),
     input->SetBranchAddress("tTightDeepTau2017v2p1VSjet", &tTightDeepTau2017v2p1VSjet);
     input->SetBranchAddress("tVTightDeepTau2017v2p1VSjet", &tVTightDeepTau2017v2p1VSjet);
     input->SetBranchAddress("tVVTightDeepTau2017v2p1VSjet", &tVVTightDeepTau2017v2p1VSjet);
+    input->SetBranchAddress("tes_syst_up", &tes_syst_up);
+    input->SetBranchAddress("tes_syst_down", &tes_syst_down);
+    input->SetBranchAddress("ftes_syst_up", &ftes_syst_up);
+    input->SetBranchAddress("ftes_syst_down", &ftes_syst_down);
 }
 
 // create electron object and set member data
@@ -187,6 +192,16 @@ tau tau_factory::run_factory() {
     t.gen_pt = tZTTGenPt;
     t.gen_eta = tZTTGenEta;
     t.gen_phi = tZTTGenPhi;
+
+    // handle shifting tau four-momenta for energy scale systematics
+    Float_t scale(0.);
+    if (t.gen_match == 5 && (syst.substr(0, 3) == "DM0" || syst.substr(0, 3) == "DM1")) {
+        scale = syst.find("Up") == std::string::npos ? tes_syst_up : tes_syst_down;
+        t.scaleTES(1 + scale);
+    } else if (t.gen_match < 5 && (syst.substr(0, 6) == "efaket" || syst.substr(0, 6) == "mfaket")) {
+        scale = syst.find("Up") == std::string::npos ? ftes_syst_up : ftes_syst_down;
+        t.scaleTES(1 + scale);
+    }
 
     // float shift = get_TES_shift(era, dmf);
     // if (syst.find("ltau_FES") != std::string::npos) {
