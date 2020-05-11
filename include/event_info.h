@@ -166,7 +166,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
      {
     auto end = std::string::npos;
     std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
-    if (syst.find("efaket_es") != end || syst.find("mfaket_et") != end) {  // lepton faking tau ES
+    if (syst.find("efaket_es") != end || syst.find("mfaket_es") != end) {  // lepton faking tau ES
         m_sv_name += "_" + fix_syst_string(syst);
         pt_sv_name += "_" + fix_syst_string(syst);
         shifting = true;  // shift will depend on eta cuts
