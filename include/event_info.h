@@ -170,7 +170,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
         m_sv_name += "_" + fix_syst_string(syst);
         pt_sv_name += "_" + fix_syst_string(syst);
         shifting = true;  // shift will depend on eta cuts
-        if (syst.find("mfaket_et") != end) {
+        if (syst.find("mfaket_es") != end) {
             always_shift = true;  // shift is always valid
         }
     } else if ((syst.find("DM0") != end || syst.find("DM1") != end)) {  // genuine tau ES
