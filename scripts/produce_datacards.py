@@ -210,9 +210,8 @@ def main(args):
                     postfix = postfix.replace('trg', 'trg_emb')
                 elif 'tautrg_' in postfix:
                     postfix = postfix.replace('trg', 'trg_emb')
-                # this will be once I update my embedded energy scale
-                # elif 'CMS_scale_t_' in postfix:
-                #     postfix = postfix.replace('scale_t_', 'scale_emb_t_')
+                elif 'CMS_scale_t_' in postfix:
+                    postfix = postfix.replace('scale_t_', 'scale_emb_t_')
 
             name = ifile.replace('.root', '').split('/')[-1]
             if 'wh125_JHU_CMS' in name or 'zh125_JHU_CMS' in name or name == 'wh125_JHU' or name == 'zh125_JHU':

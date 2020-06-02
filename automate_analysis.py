@@ -93,13 +93,8 @@ def getSyst(name, signal_type, exe, doSyst):
             'tau_id_pt_35to40_Up', 'tau_id_pt_35to40_Down',
             'tau_id_pt_ptgt40_Up', 'tau_id_pt_ptgt40_Down',
         ]
-        # this is for once the embedded energy scale is updated
-        # if name == 'embed':
-        #     systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
-        # else:
-        #     # tau energy scale systematics (will be split by pT as well soon)
-        #     systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
-        # tau energy scale systematics (will be split by pT as well soon)
+        
+        # tau energy scale
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
 
     if name == 'ZL' or name == 'TTL' or name == 'VVL' or name == 'STL' or name == 'embed':
@@ -109,17 +104,15 @@ def getSyst(name, signal_type, exe, doSyst):
                 'tau_id_el_disc_barrel_Up', 'tau_id_el_disc_barrel_Down',
                 'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
             ]
-            if name != 'embed':
-                # electron faking tau energy scale systematics (will be included eventually)
-                systs += [
-                    'efaket_es_barrel_DM0_Up', 'efaket_es_barrel_DM0_Down',
-                    'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
-                    'efaket_es_barrel_DM1_Up', 'efaket_es_barrel_DM1_Down',
-                    'efaket_es_endcap_DM1_Up', 'efaket_es_endcap_DM1_Down',
-                    'efaket_norm_pt30to40_Up', 'efaket_norm_pt30to40_Down',
-                    'efaket_norm_pt40to50_Up', 'efaket_norm_pt40to50_Down',
-                    'efaket_norm_ptgt50_Up', 'efaket_norm_ptgt50_Down',
-                ]
+            systs += [
+                'efaket_es_barrel_DM0_Up', 'efaket_es_barrel_DM0_Down',
+                'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
+                'efaket_es_barrel_DM1_Up', 'efaket_es_barrel_DM1_Down',
+                'efaket_es_endcap_DM1_Up', 'efaket_es_endcap_DM1_Down',
+                'efaket_norm_pt30to40_Up', 'efaket_norm_pt30to40_Down',
+                'efaket_norm_pt40to50_Up', 'efaket_norm_pt40to50_Down',
+                'efaket_norm_ptgt50_Up', 'efaket_norm_ptgt50_Down',
+            ]
         elif '_mt' in exe:
             # tau id vsMu systematics
             systs += [
@@ -130,8 +123,7 @@ def getSyst(name, signal_type, exe, doSyst):
                 'tau_id_mu_disc_eta_gt1p7_Up', 'tau_id_mu_disc_eta_gt1p7_Down',
             ]
             if name != 'embed':
-                # muon faking tau energy scale systematics (currently identical to nominal,
-                # but will be 1% uncorrelated across DM bins)
+                # muon faking tau energy scale systematics
                 systs += [
                     'mfaket_es_DM0_Up', 'mfaket_es_DM0_Down',
                     'mfaket_es_DM1_Up', 'mfaket_es_DM1_Down',
@@ -156,13 +148,22 @@ def getSyst(name, signal_type, exe, doSyst):
         ]
         if '2016' in exe or '2017' in exe:
             systs += ['prefiring_up', 'prefiring_down']
+        systs += [
+            'mc_single_trigger_up', 'mc_single_trigger_down',
+            'mc_cross_trigger_up', 'mc_cross_trigger_down',
+        ]
     else:
-        systs += ['tracking_up', 'tracking_down']
-
-    systs += [
-        'single_trigger_up', 'single_trigger_down',
-        'cross_trigger_up', 'cross_trigger_down',
-    ]
+        systs += [
+            'tracking_DM0_up', 'tracking_DM0_down',
+            'tracking_DM1_up', 'tracking_DM1_down',
+            'tracking_DM10_up', 'tracking_DM10_down',
+            'tracking_DM11_up', 'tracking_DM11_down',
+      
+            ]
+        systs += [
+            'embed_single_trigger_up', 'embed_single_trigger_down',
+            'embed_cross_trigger_up', 'embed_cross_trigger_down',
+        ]
 
     if name == 'TTT' or name == 'TTL':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']

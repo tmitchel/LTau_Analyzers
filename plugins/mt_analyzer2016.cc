@@ -11,6 +11,7 @@
 #include "RooMsgService.h"
 #include "RooRealVar.h"
 #include "RooWorkspace.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1D.h"
@@ -160,6 +161,10 @@ int main(int argc, char *argv[]) {
         mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
+
+    // top pT tune correction
+    TFile top_tune_corr_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/toppt_correction_to_2016.root");
+    TF1 *top_tune_corr = reinterpret_cast<TF1 *>(top_tune_corr_file.Get("toppt_ratio_to_2016"));
 
     TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -393,15 +398,18 @@ int main(int argc, char *argv[]) {
 
             // top-pT Reweighting
             if (name == "TTT" || name == "TTJ" || name == "TTL" || name == "STT" || name == "STJ" || name == "STL") {
-                float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
-                float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
+                float pt_top1 = std::min(static_cast<float>(470.), jets.getTopPt1());
+                float pt_top2 = std::min(static_cast<float>(470.), jets.getTopPt2());
+                auto top_pt_weight = sqrt(exp(0.088 - 0.00087 * pt_top1 + 0.00000092 * pt_top1 * pt_top1) *
+                                          exp(0.088 - 0.00087 * pt_top2 + 0.00000092 * pt_top2 * pt_top2));
                 if (syst == "ttbarShape_Up") {
-                    evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1);  // 2*√[e^(..)*e^(..)] - 1
+                    top_pt_weight = 2 * top_pt_weight - 1;
                 } else if (syst == "ttbarShape_Up") {
-                    // no weight for shift down
-                } else {
-                    evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));  // √[e^(..)*e^(..)]
+                    top_pt_weight = 1.;
                 }
+                evtwt *= top_pt_weight;
+                // correction for different tune in 2016
+                evtwt *= ((1. / top_tune_corr->Eval(pt_top1)) * (1. / top_tune_corr->Eval(pt_top2)));
             }
 
             // ggH theory uncertainty
@@ -460,13 +468,7 @@ int main(int argc, char *argv[]) {
             evtwt *= genweight;
 
             // tracking sf
-            if (syst == "tracking_up") {
-                evtwt *= helper->embed_tracking(tau.getDecayMode(), 1);
-            } else if (syst == "tracking_down") {
-                evtwt *= helper->embed_tracking(tau.getDecayMode(), -1);
-            } else {
-                evtwt *= helper->embed_tracking(tau.getDecayMode());
-            }
+            evtwt *= helper->embed_tracking(tau.getDecayMode(), syst);
 
             // set workspace variables
             htt_sf->var("m_pt")->setVal(muon.getPt());
