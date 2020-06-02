@@ -34,7 +34,7 @@ class Helper {
     std::unordered_map<std::string, TH2F *> *getHistos2D() { return &histos_2d; }
 
     Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) { return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2)); }
-    Float_t embed_tracking(Float_t, Int_t);
+    Float_t embed_tracking(Float_t, std::string);
 };
 
 Helper::Helper(TFile *fout, std::string name, std::string syst)
@@ -105,21 +105,33 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
     std::string suffix = systematics[syst];
 };
 
-Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
+Float_t Helper::embed_tracking(Float_t decay_mode, std::string syst = "") {
+  Float_t total(1.), total_syst(0.);
   Float_t sf(.99), prong(0.975), pizero(1.051);
   Float_t dm0_syst(0.008), dm1_syst(0.016124515), dm10_syst(0.013856406), dm11_syst(0.019697716);
+
   if (decay_mode == 0) {
-    return sf * prong + (syst * dm0_syst);
+    total = sf * prong;
+    total_syst = syst.find("tracking_DM0") != std::string::npos ? dm0_syst : 0.;
   } else if (decay_mode == 1) {
-   return sf * prong * pizero + (syst * dm1_syst);
+    total = sf * prong * pizero;
+    total_syst = syst.find("tracking_DM1_") != std::string::npos ? dm1_syst : 0.;
   } else if (decay_mode == 10) {
-   return sf * prong * prong * prong + (syst * dm10_syst);
+    total = sf * prong * prong * prong;
+    total_syst = syst.find("tracking_DM10") != std::string::npos ? dm10_syst : 0.;
   } else if (decay_mode == 11) {
-   return sf * prong * prong * prong * pizero + (syst * dm11_syst);
+    total = sf * prong * prong * prong * pizero;
+    total_syst = syst.find("tracking_DM11") != std::string::npos ? dm11_syst : 0.;
   } else {
     std::cerr << "Invalid decay mode " << decay_mode << std::endl;
     return 1;
   }
+  
+  if (syst.find("down") != std::string::npos) {
+    total_syst *= -1;
+  }
+
+  return total + total_syst;
 }
 
 #endif  // INCLUDE_SWISS_ARMY_CLASS_H_
