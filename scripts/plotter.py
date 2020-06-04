@@ -9,6 +9,7 @@ ROOT.gStyle.SetOptStat(0)
 GetColor = ROOT.TColor.GetColor
 black = ROOT.kBlack
 no_color = 0
+signal_scaling = 50.
 
 style_map_tuple = namedtuple('style_map_tuple', [
     'fill_color', 'line_color', 'line_style', 'line_width', 'marker_style'
@@ -35,7 +36,11 @@ style_map = {
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
+        "reweighted_qqH_htt_0Mf05ph0125": style_map_tuple(no_color, GetColor("#FF00AA"), 1, 3, 1),
         "reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
+        "reweighted_qqH_htt_0PH125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
+        "reweighted_qqH_htt_0L1125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
+        "reweighted_qqH_htt_0L1Zg125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
     }
 }
 
@@ -114,7 +119,7 @@ def formatStack(stack):
     stack.GetXaxis().SetNdivisions(505)
 
 
-def fillLegend(data, backgrounds, signals, stat):
+def fillLegend(data, backgrounds, signals, stat, signal_plots):
     """Fill the legend with appropriate processes."""
     leg = ROOT.TLegend(0.5, 0.45, 0.85, 0.85)
     leg.SetLineColor(0)
@@ -127,12 +132,8 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(data, 'Data', 'lep')
 
     # signals
-    leg.AddEntry(signals['reweighted_ggH_htt_0PM125'], 'ggH SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['reweighted_ggH_htt_0M125'], 'ggH PS Higgs(125)x50', 'l')
-    leg.AddEntry(signals['reweighted_ggH_htt_0Mf05ph0125'], 'ggH Mix Higgs(125)x50', 'l')
-
-    leg.AddEntry(signals['reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
+    leg.AddEntry(signals[signal_plots[0][0]], signal_plots[0][1], 'l')
+    leg.AddEntry(signals[signal_plots[1][0]], signal_plots[1][1], 'l')
 
     # backgrounds
     leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
@@ -190,23 +191,24 @@ def sigmaLines(data):
     line2.SetLineStyle(3)
     line2.SetLineColor(ROOT.kBlack)
 
-    return line1, line2
+    # nominal line
+    line3 = ROOT.TLine(low, 1., high, 1.)
+    line3.SetLineWidth(1)
+    line3.SetLineStyle(3)
+    line3.SetLineColor(ROOT.kBlack)
+
+    return line1, line2, line3
 
 
 def blindData(data, signal, background):
     """Apply blinding procedure to data."""
     for ibin in range(data.GetNbinsX()+1):
-        sig = signal.GetBinContent(ibin)
+        sig = signal.GetBinContent(ibin) / signal_scaling
         bkg = background.GetBinContent(ibin)
         if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) >= .3:
             err = data.GetBinError(ibin)
             data.SetBinContent(ibin, -1)
             data.SetBinError(ibin, err)
-
-    # if args.var == 'NN_disc':
-    #     middleBin = data.FindBin(0.5)
-    #     for ibin in range(middleBin, data.GetNbinsX()+1):
-    #         data.SetBinContent(ibin, 0)
 
     return data
 
@@ -265,25 +267,42 @@ def BuildPlot(args):
     stack.Draw('hist')
     formatStack(stack)
 
-    # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
-    combo_signal = signals['reweighted_ggH_htt_0PM125'].Clone()
-    combo_signal.Reset()
-    combo_signal.Add(signals['ggh125_powheg'])
-    combo_signal.Add(signals['vbf125_powheg'])
+    for sig_name, sig_hist in signals.iteritems():
+        if 'ggH' in sig_name:
+            sig_hist.Scale(signal_scaling*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
+        if 'qqH' in sig_name:
+            sig_hist.Scale(signal_scaling*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
+
+    signal_plots = []
+    if args.variable == 'D0_ggH':
+        signal_plots = [('reweighted_ggH_htt_0PM125', 'ggH SM Higgs(125)x50'), ('reweighted_ggH_htt_0M125', 'ggH PS Higgs(125)x50')]
+    elif args.variable == 'D0_VBF':
+        signal_plots = [('reweighted_qqH_htt_0PM125', 'VBF SM Higgs(125)x50'), ('reweighted_qqH_htt_0M125', 'VBF PS Higgs(125)x50')]
+    elif args.variable == 'D_a2_VBF':
+        signal_plots = [('reweighted_qqH_htt_0PM125', 'VBF SM Higgs(125)x50'), ('reweighted_qqH_htt_0PH125', 'VBF a2 Higgs(125)x50')]
+    elif args.variable == 'D_l1_VBF':
+        signal_plots = [('reweighted_qqH_htt_0PM125', 'VBF SM Higgs(125)x50'), ('reweighted_qqH_htt_0L1125', 'VBF #lambda_{1} Higgs(125)x50')]
+    elif args.variable == 'D_l1zg_VBF':
+        signal_plots = [('reweighted_qqH_htt_0PM125', 'VBF SM Higgs(125)x50'), ('reweighted_qqH_htt_0L1Zg125', 'VBF #lambda_{1zg} Higgs(125)x50')]
+    elif args.variable == 'DCP_ggH':
+        signal_plots = [('reweighted_ggH_htt_0PM125', 'ggH SM Higgs(125)x50'), ('reweighted_ggH_htt_0Mf05ph0125', 'ggH MM Higgs(125)x50')]
+    elif args.variable == 'DCP_VBF':
+        signal_plots = [('reweighted_qqH_htt_0PM125', 'VBF SM Higgs(125)x50'), ('reweighted_qqH_htt_0Mf05ph0125', 'VBF MM Higgs(125)x50')]
+    else:
+        signal_plots = [('reweighted_ggH_htt_0PM125', 'ggH SM Higgs(125)x50'), ('reweighted_qqH_htt_0PM125', 'VBF SM Higgs(125)x50')]
+
+    combo_signal = signals[signal_plots[0][0]].Clone()
+    combo_signal.Add(signals[signal_plots[1][0]])
     data_hist = blindData(data_hist, combo_signal, stat)
 
     # draw the plots
     data_hist.Draw('same lep')
     stat.Draw('same e2')
-    for sig_name, sig_hist in signals.iteritems():
-        if 'ggH' in sig_name:
-            sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
-        if 'qqH' in sig_name:
-            continue
-            sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
-        sig_hist.Draw('same hist')
 
-    legend = fillLegend(data_hist, backgrounds, signals, stat)
+    signals[signal_plots[0][0]].Draw('same hist')
+    signals[signal_plots[1][0]].Draw('same hist')
+
+    legend = fillLegend(data_hist, backgrounds, signals, stat, signal_plots)
     legend.Draw('same')
 
     # do some printing on the canvas
@@ -350,9 +369,10 @@ def BuildPlot(args):
     rat_unc.Draw('same e2')
     ratio.Draw('same lep')
 
-    line1, line2 = sigmaLines(data_hist)
+    line1, line2, line3 = sigmaLines(data_hist)
     line1.Draw()
     line2.Draw()
+    line3.Draw()
 
     # save the pdf
     can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.variable, args.category, args.year))
