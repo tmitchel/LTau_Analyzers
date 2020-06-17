@@ -130,7 +130,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     // otree->Branch("hjj_pT", &hjj_pT, "hjj_pT/F");
     // otree->Branch("hjj_m", &hjj_m, "hjj_m/F");
     otree->Branch("vis_mass", &vis_mass, "vis_mass/F");
-    // otree->Branch("dEtajj", &dEtajj, "dEtajj/F");
+    otree->Branch("dEtajj", &dEtajj, "dEtajj/F");
     otree->Branch("dPhijj", &dPhijj, "dPhijj/F");
 
     otree->Branch("OS", &OS, "OS/I");
