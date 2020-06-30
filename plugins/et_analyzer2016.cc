@@ -408,18 +408,18 @@ int main(int argc, char *argv[]) {
                 evtwt *= event.getVBFTheoryUnc(syst);
             }
 
-            // recoil correction systematics
-            if (syst.find("RecoilRes") != std::string::npos) {
-                if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else {
-                    event.do_shift(false);
-                }
-            }
+            // // recoil correction systematics
+            // if (syst.find("RecoilRes") != std::string::npos) {
+            //     if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else {
+            //         event.do_shift(false);
+            //     }
+            // }
 
             // MadGraph Higgs pT correction
             if (signal_type == "madgraph") {
@@ -437,13 +437,13 @@ int main(int argc, char *argv[]) {
             }
             evtwt *= efake_pt_shift;
 
-            // handle reading different m_sv values
-            if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
-                (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
-                event.do_shift(true);
-            } else {
-                event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
-            }
+            // // handle reading different m_sv values
+            // if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
+            //     (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
+            //     event.do_shift(true);
+            // } else {
+            //     event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
+            // }
 
         } else if (!isData && isEmbed) {
             // embedded generator weights

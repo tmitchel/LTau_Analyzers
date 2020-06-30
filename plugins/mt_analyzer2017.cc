@@ -435,18 +435,18 @@ int main(int argc, char *argv[]) {
                 evtwt *= event.getVBFTheoryUnc(syst);
             }
 
-            // recoil correction systematics
-            if (syst.find("RecoilRes") != std::string::npos) {
-                if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else {
-                    event.do_shift(false);
-                }
-            }
+            // // recoil correction systematics
+            // if (syst.find("RecoilRes") != std::string::npos) {
+            //     if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else {
+            //         event.do_shift(false);
+            //     }
+            // }
 
             // MadGraph Higgs pT correction
             if (signal_type == "madgraph") {
@@ -456,14 +456,14 @@ int main(int argc, char *argv[]) {
 
             // begin systematics
 
-            // handle reading different m_sv values
-            if ((syst.find("MES_lt1p2") != std::string::npos && fabs(muon.getEta()) < 1.2) ||
-                (syst.find("MES_1p2to2p1") != std::string::npos && fabs(muon.getEta()) >= 1.2 && fabs(muon.getEta()) < 2.1) ||
-                (syst.find("MES_gt2p1") != std::string::npos && fabs(muon.getEta()) >= 2.1)) {
-                event.do_shift(true);
-            } else {
-                event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
-            }
+            // // handle reading different m_sv values
+            // if ((syst.find("MES_lt1p2") != std::string::npos && fabs(muon.getEta()) < 1.2) ||
+            //     (syst.find("MES_1p2to2p1") != std::string::npos && fabs(muon.getEta()) >= 1.2 && fabs(muon.getEta()) < 2.1) ||
+            //     (syst.find("MES_gt2p1") != std::string::npos && fabs(muon.getEta()) >= 2.1)) {
+            //     event.do_shift(true);
+            // } else {
+            //     event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
+            // }
 
         } else if (!isData && isEmbed) {
             event.setEmbed();

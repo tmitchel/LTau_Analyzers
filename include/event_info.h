@@ -197,7 +197,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     }
-    
+
     // if (syst.find("efaket_es") != end || syst.find("mfaket_es") != end) {  // lepton faking tau ES
     //     m_sv_name += "_" + fix_syst_string(syst);
     //     pt_sv_name += "_" + fix_syst_string(syst);
