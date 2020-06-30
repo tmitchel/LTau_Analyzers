@@ -3,24 +3,25 @@
 #ifndef INCLUDE_EVENT_INFO_H_
 #define INCLUDE_EVENT_INFO_H_
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include "./swiss_army_class.h"
+
 #include "./qq2Hqq_uncert_scheme.h"
+#include "./swiss_army_class.h"
 
 /////////////////////////////////////////
 // Purpose: To hold general event data //
 /////////////////////////////////////////
 class event_info {
- private:
+   private:
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
-    Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
+    Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;                   // gen
     Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;  // event
-    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;  // prefiring weights
-    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;  // lepton vetos
-    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;  // madgraph reweighting
+    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;              // prefiring weights
+    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;       // lepton vetos
+    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;                               // madgraph reweighting
 
     // triggers (passing, matching, filtering)
     Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter,
@@ -33,14 +34,14 @@ class event_info {
     Float_t Ele24LooseHPSTau30Pass, Ele24LooseHPSTau30TightIDPass;
     Bool_t PassEle24Tau30_2018;
 
-    Float_t m_sv, pt_sv, m_sv_shift, m_sv_noshift;                                                                                      // SVFit
+    Float_t m_sv, pt_sv;  // , m_sv_shift, m_sv_noshift;                                                                                      // SVFit
     Float_t Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
     Float_t DCP_VBF, DCP_ggH;
-    Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_ggH_qqInit, ME_sm_WH, ME_sm_ZH, ME_ps_VBF, ME_ps_ggH, ME_ps_ggH_qqInit,
-        ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF, ME_bkg, ME_bkg1, ME_bkg2;
+    Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_ggH_qqInit, ME_sm_WH, ME_sm_ZH, ME_ps_VBF, ME_ps_ggH, ME_ps_ggH_qqInit, ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF,
+        ME_bkg, ME_bkg1, ME_bkg2;
     Float_t njets;
     std::string syst;
-    bool shifting, valid_shift, always_shift;
+    // bool shifting, valid_shift, always_shift;
 
     bool isEmbed;
     int era;
@@ -48,15 +49,16 @@ class event_info {
     std::unordered_map<std::string, int> unc_map;
     std::unordered_map<std::string, std::string> syst_name_map;
 
- public:
+   public:
     event_info(TTree*, lepton, int, bool, std::string);
     virtual ~event_info() {}
     void setEmbed() { isEmbed = true; }
     void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
     void setRivets(TTree*);
     std::string fix_syst_string(std::string);
-    void do_shift(bool _shift) { valid_shift = (_shift || always_shift); }
-    Float_t getMSV() { return shifting && valid_shift ? m_sv_shift : m_sv_noshift; }
+    // void do_shift(bool _shift) { valid_shift = (_shift || always_shift); }
+    // Float_t getMSV() { return shifting && valid_shift ? m_sv_shift : m_sv_noshift; }
+    Float_t getMSV() { return m_sv; }
     Float_t getPtSV() { return pt_sv; }
 
     // tautau Trigger Info
@@ -144,65 +146,98 @@ class event_info {
     Float_t getMadgraphPS() { return ps_weight_nlo; }
 };
 
-// read data from trees into member variables
-event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst) :
-    sm_weight_nlo(1.),
-    mm_weight_nlo(1.),
-    ps_weight_nlo(1.),
-    isEmbed(false),
-    era(_era),
-    syst(_syst),
-    lep(_lep),
-    shifting(false),
-    valid_shift(false),
-    always_shift(false),
-    unc_map{
-        {"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1},
-        {"Rivet2_Up", 2}, {"Rivet2_Down", 2}, {"Rivet3_Up", 3}, {"Rivet3_Down", 3},
-        {"Rivet4_Up", 4}, {"Rivet4_Down", 4}, {"Rivet5_Up", 5}, {"Rivet5_Down", 5},
-        {"Rivet6_Up", 6}, {"Rivet6_Down", 6}, {"Rivet7_Up", 7}, {"Rivet7_Down", 7},
-        {"Rivet8_Up", 8}, {"Rivet8_Down", 8}
+std::string event_info::fix_syst_string(std::string syst) {
+    std::string base("");
+    if (syst.find("efaket_es") != std::string::npos) {
+        base += "_LES_";
+        base += (syst.find("DM0") != std::string::npos) ? "DM0_" : "DM1_";
+        base += (syst.find("barrel") != std::string::npos) ? "barrel_" : "endcap_";
+        base += (syst.find("Up") != std::string::npos) ? "Up" : "Down";
+    } else if (syst.find("mfaket_es") != std::string::npos) {
+        base += "_LES_";
+        base += (syst.find("DM0") != std::string::npos) ? "DM0_" : "DM1_";
+        base += (syst.find("Up") != std::string::npos) ? "Up" : "Down";
     }
-     {
+    return base;
+}
+
+// read data from trees into member variables
+event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst)
+    : sm_weight_nlo(1.),
+      mm_weight_nlo(1.),
+      ps_weight_nlo(1.),
+      isEmbed(false),
+      era(_era),
+      syst(_syst),
+      lep(_lep),
+      // shifting(false),
+      // valid_shift(false),
+      // always_shift(false),
+      unc_map{{"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1}, {"Rivet2_Up", 2}, {"Rivet2_Down", 2},
+              {"Rivet3_Up", 3}, {"Rivet3_Down", 3}, {"Rivet4_Up", 4}, {"Rivet4_Down", 4}, {"Rivet5_Up", 5}, {"Rivet5_Down", 5},
+              {"Rivet6_Up", 6}, {"Rivet6_Down", 6}, {"Rivet7_Up", 7}, {"Rivet7_Down", 7}, {"Rivet8_Up", 8}, {"Rivet8_Down", 8}} {
     auto end = std::string::npos;
     std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
     if (syst.find("efaket_es") != end || syst.find("mfaket_es") != end) {  // lepton faking tau ES
-        m_sv_name += "_" + fix_syst_string(syst);
-        pt_sv_name += "_" + fix_syst_string(syst);
-        shifting = true;  // shift will depend on eta cuts
-        if (syst.find("mfaket_es") != end) {
-            always_shift = true;  // shift is always valid
-        }
+        m_sv_name += fix_syst_string(syst);
+        pt_sv_name += fix_syst_string(syst);
+    } else if (syst.find("tracking") != end) {
+        // Do nothing. Just making sure the DM0 in the name isn't picked
+        // up by the line doing TES
     } else if ((syst.find("DM0") != end || syst.find("DM1") != end)) {  // genuine tau ES
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
-        always_shift = true;  // shifts will depend on pT in the future
-    } else if (syst.find("Jet") != end) {
+    } else if (syst.find("Jet") != end) {  // JECs
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
-        always_shift = true;  // shift is always valid
-    } else if (syst.find("EES") != end) {  // lepton ES
+    } else if (syst.find("EES") != end || syst.find("MES") != end) {  // lepton ES
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
-        always_shift = true;  // shift is always valid
-    } else if (syst.find("MES") != end) {
-        m_sv_name += "_" + fix_syst_string(syst);
-        pt_sv_name += "_" + fix_syst_string(syst);
-        shifting = true;
-    } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
+    } else if (syst.find("Recoil") != end) {  // recoil corrections
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
     }
+    
+    // if (syst.find("efaket_es") != end || syst.find("mfaket_es") != end) {  // lepton faking tau ES
+    //     m_sv_name += "_" + fix_syst_string(syst);
+    //     pt_sv_name += "_" + fix_syst_string(syst);
+    //     shifting = true;  // shift will depend on eta cuts
+    //     if (syst.find("mfaket_es") != end) {
+    //         always_shift = true;  // shift is always valid
+    //     }
+    // } else if ((syst.find("DM0") != end || syst.find("DM1") != end)) {  // genuine tau ES
+    //     m_sv_name += "_" + syst;
+    //     pt_sv_name += "_" + syst;
+    //     shifting = true;
+    //     always_shift = true;  // shifts will depend on pT in the future
+    // } else if (syst.find("Jet") != end) {
+    //     m_sv_name += "_" + syst;
+    //     pt_sv_name += "_" + syst;
+    //     shifting = true;
+    //     always_shift = true;  // shift is always valid
+    // } else if (syst.find("EES") != end) {  // lepton ES
+    //     m_sv_name += "_" + syst;
+    //     pt_sv_name += "_" + syst;
+    //     shifting = true;
+    //     always_shift = true;  // shift is always valid
+    // } else if (syst.find("MES") != end) {
+    //     m_sv_name += "_" + fix_syst_string(syst);
+    //     pt_sv_name += "_" + fix_syst_string(syst);
+    //     shifting = true;
+    //     always_shift = true;
+    // } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
+    //     m_sv_name += "_" + syst;
+    //     pt_sv_name += "_" + syst;
+    //     shifting = true;
+    //     always_shift = true;
+    // }
 
-    input->SetBranchAddress("m_sv", &m_sv_noshift);
+    // input->SetBranchAddress("m_sv", &m_sv_noshift);
     input->SetBranchAddress(pt_sv_name.c_str(), &pt_sv);
-    if (shifting) {
-        input->SetBranchAddress(m_sv_name.c_str(), &m_sv_shift);
-    }
+    input->SetBranchAddress(m_sv_name.c_str(), &m_sv);
+    // if (shifting) {
+    //     input->SetBranchAddress(m_sv_name.c_str(), &m_sv_shift);
+    // }
     input->SetBranchAddress("D_CP_VBF", &DCP_VBF);
     input->SetBranchAddress("D_CP_ggH", &DCP_ggH);
     input->SetBranchAddress("Phi0", &Phi);
@@ -266,14 +301,14 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
 
     if (lep == lepton::ELECTRON) {
         if (isEmbed) {
-          input->SetBranchAddress("eMatchEmbeddedFilterEle24Tau30", &eMatchEmbeddedFilterEle24Tau30);
-          input->SetBranchAddress("tMatchEmbeddedFilterEle24Tau30", &tMatchEmbeddedFilterEle24Tau30);
+            input->SetBranchAddress("eMatchEmbeddedFilterEle24Tau30", &eMatchEmbeddedFilterEle24Tau30);
+            input->SetBranchAddress("tMatchEmbeddedFilterEle24Tau30", &tMatchEmbeddedFilterEle24Tau30);
         }
     } else if (lep == lepton::MUON) {
         if (isEmbed) {
-          input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2017", &mMatchEmbeddedFilterMu20Tau27_2017);
-          input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2018", &mMatchEmbeddedFilterMu20Tau27_2018);
-          input->SetBranchAddress("tMatchEmbeddedFilterMu20HPSTau27", &tMatchEmbeddedFilterMu20HPSTau27);
+            input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2017", &mMatchEmbeddedFilterMu20Tau27_2017);
+            input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2018", &mMatchEmbeddedFilterMu20Tau27_2018);
+            input->SetBranchAddress("tMatchEmbeddedFilterMu20HPSTau27", &tMatchEmbeddedFilterMu20HPSTau27);
         }
     } else if (lep == lepton::EMU) {
         // no analyzer yet
@@ -282,21 +317,21 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     }
 }
 
-std::string event_info::fix_syst_string(std::string syst) {
-    auto end = std::string::npos;
-    if (syst.find("DM0_Up") != end) {
-        return "LES_DM0_Up";
-    } else if (syst.find("DM0_Down") != end) {
-        return "LES_DM0_Down";
-    } else if (syst.find("DM1_Up") != end) {
-        return "LES_DM1_Up";
-    } else if (syst.find("DM1_Down") != end) {
-        return "LES_DM1_Down";
-    } else if (syst.find("MES") != end) {
-        return syst.find("Up") != end ? "MES_Up" : "MES_Down";
-    }
-    return syst;
-}
+// std::string event_info::fix_syst_string(std::string syst) {
+//     auto end = std::string::npos;
+//     if (syst.find("DM0_Up") != end) {
+//         return "LES_DM0_Up";
+//     } else if (syst.find("DM0_Down") != end) {
+//         return "LES_DM0_Down";
+//     } else if (syst.find("DM1_Up") != end) {
+//         return "LES_DM1_Up";
+//     } else if (syst.find("DM1_Down") != end) {
+//         return "LES_DM1_Down";
+//     } else if (syst.find("MES") != end) {
+//         return syst.find("Up") != end ? "MES_Up" : "MES_Down";
+//     }
+//     return syst;
+// }
 
 Float_t event_info::getPrefiringWeight() {
     if (syst == "prefiring_up") {
@@ -364,16 +399,14 @@ Float_t event_info::getVBFTheoryUnc(std::string syst) {
 
 Bool_t event_info::getPassFlags(Bool_t isData) {
     if (era == 2016) {
-        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
+                 (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
     } else if (era == 2017) {
-        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
-                || Flag_ecalBadCalibFilter);
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
+                 (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter || Flag_ecalBadCalibFilter);
     } else {
-        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
-                || Flag_ecalBadCalibFilter);
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
+                 (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter || Flag_ecalBadCalibFilter);
     }
 }
 
@@ -384,25 +417,19 @@ Bool_t event_info::getPassEle24Tau30() {
 Bool_t event_info::getPassEle24Tau30_2018(Bool_t isData) {
     PassEle24Tau30_2018 = eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path;
     if (isData && run < 317509) {
-      return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass; 
+        return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass;
     } else if ((isData && run >= 317509) || !isData) {
-      return eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path && Ele24LooseHPSTau30Pass; 
+        return eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path &&
+               Ele24LooseHPSTau30Pass;
     }
     return false;
 }
 
+Bool_t event_info::getPassElEmbedCross() { return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30; }
 
-Bool_t event_info::getPassElEmbedCross() {
-  return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
-}
+Bool_t event_info::getPassMuEmbedCross2017() { return mMatchEmbeddedFilterMu20Tau27_2017 && tMatchEmbeddedFilterMu20HPSTau27; }
 
-Bool_t event_info::getPassMuEmbedCross2017() {
-  return mMatchEmbeddedFilterMu20Tau27_2017 && tMatchEmbeddedFilterMu20HPSTau27;
-}
-
-Bool_t event_info::getPassMuEmbedCross2018() {
-  return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27;
-}
+Bool_t event_info::getPassMuEmbedCross2018() { return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27; }
 
 Bool_t event_info::getPassCrossTrigger(Float_t pt) {
     if (lep == lepton::ELECTRON) {
