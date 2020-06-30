@@ -205,7 +205,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     }
     input->SetBranchAddress("D_CP_VBF", &DCP_VBF);
     input->SetBranchAddress("D_CP_ggH", &DCP_ggH);
-    input->SetBranchAddress("Phi", &Phi);
+    input->SetBranchAddress("Phi0", &Phi);
     input->SetBranchAddress("Phi1", &Phi1);
     input->SetBranchAddress("costheta1", &costheta1);
     input->SetBranchAddress("costheta2", &costheta2);
