@@ -171,6 +171,10 @@ int main(int argc, char *argv[]) {
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
     TGraph *g_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_3jet"));
+    TGraph *g_mcatnlo_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_0jet"));
+    TGraph *g_mcatnlo_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_1jet"));
+    TGraph *g_mcatnlo_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_2jet"));
+    TGraph *g_mcatnlo_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_3jet"));
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -397,6 +401,15 @@ int main(int argc, char *argv[]) {
                 if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
+                if (syst.find("ggH_Rivet") != std::string::npos) {
+                    evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                }
+            } else if (sample == "ggh125" && signal_type == "madgraph") {
+                if (event.getNjetsRivet() == 0) evtwt *= g_mcatnlo_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+                if (event.getNjetsRivet() == 1) evtwt *= g_mcatnlo_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+                if (event.getNjetsRivet() == 2) evtwt *= g_mcatnlo_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+                if (event.getNjetsRivet() >= 3) evtwt *= g_mcatnlo_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
                 NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
                 if (syst.find("ggH_Rivet") != std::string::npos) {
                     evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
