@@ -1,4 +1,5 @@
 import ROOT
+import time
 import pandas
 import numpy
 import uproot
@@ -130,6 +131,7 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
 
 
 def main(args):
+    start = time.time()
     keys = uproot.open('{}/data_obs.root'.format(args.input)).keys()
     tree_name = parse_tree_name(keys)
     channel_prefix = tree_name[:2]
@@ -247,6 +249,8 @@ def main(args):
 
     if '/hdfs' in args.input:
         call('mv -v {}/jetFakes.root {}'.format(output_dir, args.input), shell=True)
+
+    print 'Finished in {} seconds'.format(time.time() - start)
 
 
 if __name__ == "__main__":
