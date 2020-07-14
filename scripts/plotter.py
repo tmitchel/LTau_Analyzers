@@ -320,8 +320,13 @@ def BuildPlot(args):
         lumi = "41.5 fb^{-1}"
     elif args.year == '2018':
         lumi = "59.7 fb^{-1}"
+    elif args.year == 'all':
+        lumi = "137.0 fb^{-1}"
 
-    ll.DrawLatex(0.42, 0.94, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
+    year_label = args.year
+    if args.year == 'all':
+      year_label = ''
+    ll.DrawLatex(0.42, 0.94, "{} {}, {} (13 TeV)".format(lepLabel, year_label, lumi))
 
     cms = ROOT.TLatex()
     cms.SetNDC(ROOT.kTRUE)
