@@ -448,11 +448,11 @@ int main(int argc, char *argv[]) {
             //     }
             // }
 
-            // MadGraph Higgs pT correction
-            if (signal_type == "madgraph") {
-                mg_sf->var("HpT")->setVal(Higgs.Pt());
-                evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
-            }
+            // // MadGraph Higgs pT correction
+            // if (signal_type == "madgraph") {
+            //     mg_sf->var("HpT")->setVal(Higgs.Pt());
+            //     evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
+            // }
 
             auto efake_pt_shift(1.);
             if (syst.find("efaket_norm_ptgt50") != std::string::npos && tau.getPt() > 50) {

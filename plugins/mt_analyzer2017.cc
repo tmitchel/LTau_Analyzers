@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     reweight::LumiReWeighting *lumi_weights;
     // read inputs for lumi reweighting
     if (!isData && !isEmbed && !doAC && !isMG) {
-        TNamed *dbsName = reinterpret_cast<TNamed *>(fin->Get("MiniAOD_name"));
+        TH1F *dbsName = reinterpret_cast<TH1F *>(fin->Get("MiniAOD_name"));
         std::string datasetName = dbsName->GetTitle();
         if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
             fin->Close();
@@ -461,11 +461,11 @@ int main(int argc, char *argv[]) {
             //     }
             // }
 
-            // MadGraph Higgs pT correction
-            if (signal_type == "madgraph") {
-                mg_sf->var("HpT")->setVal(Higgs.Pt());
-                evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
-            }
+            // // MadGraph Higgs pT correction
+            // if (signal_type == "madgraph") {
+            //     mg_sf->var("HpT")->setVal(Higgs.Pt());
+            //     evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
+            // }
 
             // begin systematics
 

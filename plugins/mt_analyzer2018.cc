@@ -441,11 +441,11 @@ int main(int argc, char *argv[]) {
             //     }
             // }
 
-            // MadGraph Higgs pT correction
-            if (signal_type == "madgraph") {
-                mg_sf->var("HpT")->setVal(Higgs.Pt());
-                evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
-            }
+            // // MadGraph Higgs pT correction
+            // if (signal_type == "madgraph") {
+            //     mg_sf->var("HpT")->setVal(Higgs.Pt());
+            //     evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
+            // }
 
             // // handle reading different m_sv values
             // if ((syst.find("MES_lt1p2") != std::string::npos && fabs(muon.getEta()) < 1.2) ||
