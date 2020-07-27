@@ -59,7 +59,7 @@ def getNames(sample):
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
-    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc', 'minlo']
+    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
     for sample in invalid_samples:
         if sample in ifile:
             return False
@@ -304,6 +304,7 @@ def main(args):
             file_map = defaultdict(list)
             for name in names:
                 systs = getSyst(name, signal_type, args.exe, args.syst)
+                if signal_type != "madgraph" and signal_type != "minlo": continue
                 for syst in systs:
                     if syst == '':
                       syst = 'NOMINAL'
@@ -343,7 +344,7 @@ def main(args):
             tosample = ifile.replace(sample+suffix, '')
 
             names, signal_type = getNames(sample)
-            # if signal_type != "None": continue
+            if signal_type != "minlo": continue
             callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 
