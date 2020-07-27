@@ -8,3 +8,5 @@ bin
 .pyenv
 *.pyc
 *.tar.gz
+local
+.ipynb_checkpoints/

@@ -59,7 +59,7 @@ def getNames(sample):
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
-    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc', 'minlo']
+    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
     for sample in invalid_samples:
         if sample in ifile:
             return False
@@ -183,9 +183,9 @@ def getSyst(name, signal_type, exe, doSyst):
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
         systs += [
-            'RecoilReso_0jet_Up', 'RecoilReso_0jet_Down', 'RecoilResp_0jet_Up', 'RecoilResp_0jet_Down',
-            'RecoilReso_1jet_Up', 'RecoilReso_1jet_Down', 'RecoilResp_1jet_Up', 'RecoilResp_1jet_Down',
-            'RecoilReso_2jet_Up', 'RecoilReso_2jet_Down', 'RecoilResp_2jet_Up', 'RecoilResp_2jet_Down',
+            'RecoilReso_njets0_Up', 'RecoilReso_njets0_Down', 'RecoilResp_njets0_Up', 'RecoilResp_njets0_Down',
+            'RecoilReso_njets1_Up', 'RecoilReso_njets1_Down', 'RecoilResp_njets1_Up', 'RecoilResp_njets1_Down',
+            'RecoilReso_njets2_Up', 'RecoilReso_njets2_Down', 'RecoilResp_njets2_Up', 'RecoilResp_njets2_Down',
             ]
 
     if name == 'ggH125' and signal_type == 'powheg':
@@ -304,6 +304,7 @@ def main(args):
             file_map = defaultdict(list)
             for name in names:
                 systs = getSyst(name, signal_type, args.exe, args.syst)
+                if signal_type != "madgraph" and signal_type != "minlo": continue
                 for syst in systs:
                     if syst == '':
                       syst = 'NOMINAL'
@@ -343,7 +344,7 @@ def main(args):
             tosample = ifile.replace(sample+suffix, '')
 
             names, signal_type = getNames(sample)
-            # if signal_type != "None": continue
+            if signal_type != "minlo": continue
             callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 

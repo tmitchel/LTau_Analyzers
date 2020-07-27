@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     reweight::LumiReWeighting *lumi_weights;
     // read inputs for lumi reweighting
     if (!isData && !isEmbed && !doAC && !isMG) {
-        TNamed *dbsName = reinterpret_cast<TNamed *>(fin->Get("MiniAOD_name"));
+        TH1F *dbsName = reinterpret_cast<TH1F *>(fin->Get("MiniAOD_name"));
         std::string datasetName = dbsName->GetTitle();
         if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
             fin->Close();
@@ -178,6 +178,10 @@ int main(int argc, char *argv[]) {
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
     TGraph *g_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_3jet"));
+    TGraph *g_mcatnlo_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_0jet"));
+    TGraph *g_mcatnlo_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_1jet"));
+    TGraph *g_mcatnlo_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_2jet"));
+    TGraph *g_mcatnlo_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_3jet"));
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -195,7 +199,7 @@ int main(int argc, char *argv[]) {
     jet_factory jets(ntuple, 2017, syst);
     met_factory met(ntuple, 2017, syst);
 
-    if (sample == "ggh125" && signal_type == "powheg") {
+    if (signal_type == "powheg" || signal_type == "madgraph") {
         event.setRivets(ntuple);
     }
 
@@ -428,6 +432,15 @@ int main(int argc, char *argv[]) {
                 if (syst.find("ggH_Rivet") != std::string::npos) {
                     evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
+            } else if (signal_type == "madgraph") {
+                if (event.getNjetsRivet() == 0) evtwt *= g_mcatnlo_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+                if (event.getNjetsRivet() == 1) evtwt *= g_mcatnlo_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+                if (event.getNjetsRivet() == 2) evtwt *= g_mcatnlo_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+                if (event.getNjetsRivet() >= 3) evtwt *= g_mcatnlo_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
+                if (syst.find("ggH_Rivet") != std::string::npos) {
+                    evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                }
             }
 
             // VBF theory uncertainty
@@ -435,35 +448,35 @@ int main(int argc, char *argv[]) {
                 evtwt *= event.getVBFTheoryUnc(syst);
             }
 
-            // recoil correction systematics
-            if (syst.find("RecoilRes") != std::string::npos) {
-                if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
-                    event.do_shift(true);
-                } else {
-                    event.do_shift(false);
-                }
-            }
+            // // recoil correction systematics
+            // if (syst.find("RecoilRes") != std::string::npos) {
+            //     if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
+            //         event.do_shift(true);
+            //     } else {
+            //         event.do_shift(false);
+            //     }
+            // }
 
-            // MadGraph Higgs pT correction
-            if (signal_type == "madgraph") {
-                mg_sf->var("HpT")->setVal(Higgs.Pt());
-                evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
-            }
+            // // MadGraph Higgs pT correction
+            // if (signal_type == "madgraph") {
+            //     mg_sf->var("HpT")->setVal(Higgs.Pt());
+            //     evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
+            // }
 
             // begin systematics
 
-            // handle reading different m_sv values
-            if ((syst.find("MES_lt1p2") != std::string::npos && fabs(muon.getEta()) < 1.2) ||
-                (syst.find("MES_1p2to2p1") != std::string::npos && fabs(muon.getEta()) >= 1.2 && fabs(muon.getEta()) < 2.1) ||
-                (syst.find("MES_gt2p1") != std::string::npos && fabs(muon.getEta()) >= 2.1)) {
-                event.do_shift(true);
-            } else {
-                event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
-            }
+            // // handle reading different m_sv values
+            // if ((syst.find("MES_lt1p2") != std::string::npos && fabs(muon.getEta()) < 1.2) ||
+            //     (syst.find("MES_1p2to2p1") != std::string::npos && fabs(muon.getEta()) >= 1.2 && fabs(muon.getEta()) < 2.1) ||
+            //     (syst.find("MES_gt2p1") != std::string::npos && fabs(muon.getEta()) >= 2.1)) {
+            //     event.do_shift(true);
+            // } else {
+            //     event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
+            // }
 
         } else if (!isData && isEmbed) {
             event.setEmbed();
