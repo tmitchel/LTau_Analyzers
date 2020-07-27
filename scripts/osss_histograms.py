@@ -74,10 +74,7 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
         if '_JHU' in name:
             ac_map = 'jhu_ac_reweighting_map'
         else:
-            if year == '2018':
-                ac_map = 'new_mg_ac_reweighting_map'
-            else:
-                ac_map = 'mg_ac_reweighting_map'
+            ac_map = 'mg_ac_reweighting_map'
 
         for weight in get_ac_weights(name, boilerplate[ac_map]):
             ac_config = copy.deepcopy(config)
