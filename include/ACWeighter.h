@@ -65,11 +65,7 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
     isZHAC = sample == "zh125";
 
     string stype_dir = "";
-    if (signal_type == "madgraph" && year == "2016") {
-        notSignal = true;
-    } else if (signal_type == "madgraph" && year == "2017") {
-        stype_dir = "/MG2017_X10_v2/";
-    } else if (signal_type == "madgraph" && year == "2018") {
+    if (signal_type == "madgraph") {
         notSignal = true;
     } else if (signal_type == "JHU" && year == "2016") {
         stype_dir = "/JHU2016/";
@@ -97,7 +93,7 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
         weightNames = {"a1", "a3", "a3int"};
     }
 
-    // 2017 has extra weights
+    // 2017/2018 have extra weights
     if ((year == "2018" || year == "2017") && isVBFAC) {
         weightNames.push_back("l1zg");
         weightNames.push_back("l1zgint");
