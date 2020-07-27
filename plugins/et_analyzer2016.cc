@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
 
-    if (sample == "ggh125" && signal_type == "powheg") {
+    if (signal_type == "powheg" || signal_type == "madgraph") {
         event.setRivets(ntuple);
     }
 
@@ -405,7 +405,7 @@ int main(int argc, char *argv[]) {
                 if (syst.find("ggH_Rivet") != std::string::npos) {
                     evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
-            } else if (sample == "ggh125" && signal_type == "madgraph") {
+            } else if (signal_type == "madgraph") {
                 if (event.getNjetsRivet() == 0) evtwt *= g_mcatnlo_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
                 if (event.getNjetsRivet() == 1) evtwt *= g_mcatnlo_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_mcatnlo_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
