@@ -307,9 +307,6 @@ int main(int argc, char *argv[]) {
             // generator weights
             evtwt *= event.getGenWeight();
 
-            // prefiring weight
-            evtwt *= event.getPrefiringWeight();
-
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
 
