@@ -301,6 +301,16 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
 
     if (lep == lepton::ELECTRON) {
         if (isEmbed) {
+            input->SetBranchAddress("Ele24LooseTau30Pass", &Ele24LooseTau30Pass);
+            input->SetBranchAddress("eMatchesEle24Tau30Filter", &eMatchesEle24Tau30Filter);
+            input->SetBranchAddress("eMatchesEle24Tau30Path", &eMatchesEle24Tau30Path);
+            input->SetBranchAddress("tMatchesEle24Tau30Filter", &tMatchesEle24Tau30Filter);
+            input->SetBranchAddress("tMatchesEle24Tau30Path", &tMatchesEle24Tau30Path);
+            input->SetBranchAddress("eMatchesEle24HPSTau30Filter", &eMatchesEle24HPSTau30Filter);
+            input->SetBranchAddress("eMatchesEle24HPSTau30Path", &eMatchesEle24HPSTau30Path);
+            input->SetBranchAddress("tMatchesEle24HPSTau30Filter", &tMatchesEle24HPSTau30Filter);
+            input->SetBranchAddress("tMatchesEle24HPSTau30Path", &tMatchesEle24HPSTau30Path);
+            input->SetBranchAddress("Ele24LooseHPSTau30Pass", &Ele24LooseHPSTau30Pass);
             input->SetBranchAddress("eMatchEmbeddedFilterEle24Tau30", &eMatchEmbeddedFilterEle24Tau30);
             input->SetBranchAddress("tMatchEmbeddedFilterEle24Tau30", &tMatchEmbeddedFilterEle24Tau30);
         }
