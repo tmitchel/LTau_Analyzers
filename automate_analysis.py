@@ -304,7 +304,7 @@ def main(args):
             file_map = defaultdict(list)
             for name in names:
                 systs = getSyst(name, signal_type, args.exe, args.syst)
-                if signal_type != "madgraph" and signal_type != "minlo": continue
+                # if signal_type != "madgraph" and signal_type != "minlo": continue
                 for syst in systs:
                     if syst == '':
                       syst = 'NOMINAL'
@@ -344,7 +344,7 @@ def main(args):
             tosample = ifile.replace(sample+suffix, '')
 
             names, signal_type = getNames(sample)
-            if signal_type != "minlo": continue
+            # if not 'ZTT' in names: continue
             callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 

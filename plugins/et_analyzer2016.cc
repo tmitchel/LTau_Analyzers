@@ -516,9 +516,9 @@ int main(int argc, char *argv[]) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
-            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
-            }
+            // if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
+            //     evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+            // }
 
             // double muon trigger eff in selection
             evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();

@@ -300,7 +300,6 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     }
 
     if (lep == lepton::ELECTRON) {
-        if (isEmbed) {
             input->SetBranchAddress("Ele24LooseTau30Pass", &Ele24LooseTau30Pass);
             input->SetBranchAddress("eMatchesEle24Tau30Filter", &eMatchesEle24Tau30Filter);
             input->SetBranchAddress("eMatchesEle24Tau30Path", &eMatchesEle24Tau30Path);
@@ -313,7 +312,6 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
             input->SetBranchAddress("Ele24LooseHPSTau30Pass", &Ele24LooseHPSTau30Pass);
             input->SetBranchAddress("eMatchEmbeddedFilterEle24Tau30", &eMatchEmbeddedFilterEle24Tau30);
             input->SetBranchAddress("tMatchEmbeddedFilterEle24Tau30", &tMatchEmbeddedFilterEle24Tau30);
-        }
     } else if (lep == lepton::MUON) {
         if (isEmbed) {
             input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2017", &mMatchEmbeddedFilterMu20Tau27_2017);
@@ -421,16 +419,15 @@ Bool_t event_info::getPassFlags(Bool_t isData) {
 }
 
 Bool_t event_info::getPassEle24Tau30() {
-    return Ele24LooseTau30Pass && eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path;
+    return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
 }
 
 Bool_t event_info::getPassEle24Tau30_2018(Bool_t isData) {
     PassEle24Tau30_2018 = eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path;
     if (isData && run < 317509) {
-        return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass;
+        return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
     } else if ((isData && run >= 317509) || !isData) {
-        return eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path &&
-               Ele24LooseHPSTau30Pass;
+        return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
     }
     return false;
 }

@@ -271,12 +271,12 @@ int main(int argc, char *argv[]) {
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
         double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getP4().Px() + met_x, 2) - pow(electron.getP4().Py() + met_y, 2));
 
-        // now do mt selection
-        if (mt < 50) {
-            histos->at("cutflow")->Fill(5., 1.);
-        } else {
-            continue;
-        }
+        // // now do mt selection
+        // if (mt < 50) {
+        //     histos->at("cutflow")->Fill(5., 1.);
+        // } else {
+        //     continue;
+        // }
 
         // b-jet veto
         if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
@@ -472,7 +472,7 @@ int main(int argc, char *argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
             // embedded cross-triggers not applied in skimmer
-            if (electron.getPt() < 33 && !event.getPassEle24Tau30_2018(isData) && abs(tau.getEta()) < 1.479) {
+            if (electron.getPt() < 33 && !event.getPassEle24Tau30_2018(isData)) {
                 continue;
             }
 
@@ -489,7 +489,7 @@ int main(int argc, char *argv[]) {
             // set workspace variables
             htt_sf->var("e_pt")->setVal(electron.getPt());
             htt_sf->var("e_eta")->setVal(electron.getEta());
-            htt_sf->var("t_pt")->setVal(tau.getPt());
+            htt_sf->var("t_pt")->setVal(35.0);
             htt_sf->var("t_eta")->setVal(tau.getEta());
             htt_sf->var("t_phi")->setVal(tau.getPhi());
             htt_sf->var("t_dm")->setVal(tau.getDecayMode());
@@ -517,9 +517,9 @@ int main(int argc, char *argv[]) {
             // trigger scale factors
             bool fireSingle = electron.getPt() > 33;
             bool fireCross = electron.getPt() < 33;
-            std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
-            std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
-            std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_mediumDeepTau_etau_embed_ratio" : "t_trg_mediumDeepTau_etau_data";
+            std::string single_eff_name = "e_trg_ic_embed_ratio";
+            std::string el_leg_eff_name = "e_trg_24_ic_embed_ratio";
+            std::string tau_leg_eff_name =  "t_trg_mediumDeepTau_etau_embed_ratio";
             if (syst == "embed_cross_trigger_up") {
                 tau_leg_eff_name += "_up";
             } else if (syst == "embed_cross_trigger_down") {
@@ -553,9 +553,9 @@ int main(int argc, char *argv[]) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
-            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
-            }
+            // if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
+            //     evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+            // }
 
             // double muon trigger eff in selection
             evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
