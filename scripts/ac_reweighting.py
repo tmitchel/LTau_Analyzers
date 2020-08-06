@@ -10,7 +10,6 @@ from subprocess import call
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
     for name in [
-        'ggh125_madgraph.root',
         'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root'
     ]:
         if name in ifile:
@@ -21,11 +20,7 @@ def to_reweight(ifile):
 def recognize_signal(ifile):
     """Pick the correct keys for this sample."""
     process = ifile.split('/')[-1].split('125')[0]
-    key = ''
-    if process == 'ggh':
-        key = 'mg_ac_reweighting_map'
-    else:
-        key = 'jhu_ac_reweighting_map'
+    key = 'jhu_ac_reweighting_map'
     return key, process
 
 
