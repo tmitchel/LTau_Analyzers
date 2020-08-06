@@ -43,7 +43,7 @@ def process_dir(ifile, idir, temp_name, input_path, boilerplate):
     open_file = uproot.open(ifile)
     tree_name = parse_tree_name(open_file.keys())
     oldtree = open_file[tree_name].arrays(['*'])
-    treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
+    treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys() if not 'wt_' in ikey}
 
     # build DataFrame
     events = pandas.DataFrame(oldtree)
