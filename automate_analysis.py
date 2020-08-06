@@ -100,10 +100,11 @@ def getSyst(name, signal_type, exe, doSyst):
     if name == 'ZL' or name == 'TTL' or name == 'VVL' or name == 'STL' or name == 'embed':
         if '_et' in exe:
             # tau id vsEl systematics
-            systs += [
-                'tau_id_el_disc_barrel_Up', 'tau_id_el_disc_barrel_Down',
-                'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
-            ]
+            if name != 'embed':
+                systs += [
+                    'tau_id_el_disc_barrel_Up', 'tau_id_el_disc_barrel_Down',
+                    'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
+                ]
             systs += [
                 'efaket_es_barrel_DM0_Up', 'efaket_es_barrel_DM0_Down',
                 'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
@@ -304,7 +305,7 @@ def main(args):
             file_map = defaultdict(list)
             for name in names:
                 systs = getSyst(name, signal_type, args.exe, args.syst)
-                if signal_type != "madgraph" and signal_type != "minlo": continue
+                # if signal_type != "madgraph" and signal_type != "minlo": continue
                 for syst in systs:
                     if syst == '':
                       syst = 'NOMINAL'
@@ -344,7 +345,7 @@ def main(args):
             tosample = ifile.replace(sample+suffix, '')
 
             names, signal_type = getNames(sample)
-            if signal_type != "minlo": continue
+            # if not 'ZTT' in names: continue
             callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 
