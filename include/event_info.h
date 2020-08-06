@@ -300,6 +300,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     }
 
     if (lep == lepton::ELECTRON) {
+        if (era > 2016) {
             input->SetBranchAddress("Ele24LooseTau30Pass", &Ele24LooseTau30Pass);
             input->SetBranchAddress("eMatchesEle24Tau30Filter", &eMatchesEle24Tau30Filter);
             input->SetBranchAddress("eMatchesEle24Tau30Path", &eMatchesEle24Tau30Path);
@@ -312,6 +313,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
             input->SetBranchAddress("Ele24LooseHPSTau30Pass", &Ele24LooseHPSTau30Pass);
             input->SetBranchAddress("eMatchEmbeddedFilterEle24Tau30", &eMatchEmbeddedFilterEle24Tau30);
             input->SetBranchAddress("tMatchEmbeddedFilterEle24Tau30", &tMatchEmbeddedFilterEle24Tau30);
+        }
     } else if (lep == lepton::MUON) {
         if (isEmbed) {
             input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2017", &mMatchEmbeddedFilterMu20Tau27_2017);

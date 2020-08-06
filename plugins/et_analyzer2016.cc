@@ -506,20 +506,6 @@ int main(int argc, char *argv[]) {
                 evtwt *= 0.98;
             }
 
-            // electron fake rate SF
-            std::string e_fake_id_name = "t_id_vs_e_eta_tight";
-            if (syst.find("tau_id_el_disc") != std::string::npos) {
-                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
-                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
-                    e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
-                }
-            }
-            // if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-            //     evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
-            // }
-
             // double muon trigger eff in selection
             evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
 

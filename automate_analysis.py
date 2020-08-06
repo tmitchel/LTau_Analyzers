@@ -100,10 +100,11 @@ def getSyst(name, signal_type, exe, doSyst):
     if name == 'ZL' or name == 'TTL' or name == 'VVL' or name == 'STL' or name == 'embed':
         if '_et' in exe:
             # tau id vsEl systematics
-            systs += [
-                'tau_id_el_disc_barrel_Up', 'tau_id_el_disc_barrel_Down',
-                'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
-            ]
+            if name != 'embed':
+                systs += [
+                    'tau_id_el_disc_barrel_Up', 'tau_id_el_disc_barrel_Down',
+                    'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
+                ]
             systs += [
                 'efaket_es_barrel_DM0_Up', 'efaket_es_barrel_DM0_Down',
                 'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
