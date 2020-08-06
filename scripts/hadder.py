@@ -1,5 +1,6 @@
 
 import os
+import copy
 import json
 import multiprocessing
 from glob import glob
@@ -49,14 +50,15 @@ def combine_wh(hadd_list, path):
 
 
 def split_madgraph(hadd_list):
+    new_hadd_list = copy.deepcopy(hadd_list.copy())
     for idir in hadd_list.keys():
         for sample, files in hadd_list[idir].iteritems():
             if sample == 'ggh125_madgraph':
-                hadd_list[idir]['reweighted_ggH_htt_0PM125'] = [ifile for ifile in files if '_a1_' in ifile]
-                hadd_list[idir]['reweighted_ggH_htt_0M125'] = [ifile for ifile in files if '_a3_' in ifile]
-                hadd_list[idir]['reweighted_ggH_htt_0Mf05ph0125'] = [ifile for ifile in files if '_a3int_' in ifile]
-                del hadd_list[idir]['ggh125_madgraph']
-    return hadd_list
+                new_hadd_list[idir]['reweighted_ggH_htt_0PM125'] = [ifile for ifile in files if '_a1_' in ifile]
+                new_hadd_list[idir]['reweighted_ggH_htt_0M125'] = [ifile for ifile in files if '_a3_' in ifile]
+                new_hadd_list[idir]['reweighted_ggH_htt_0Mf05ph0125'] = [ifile for ifile in files if '_a3int_' in ifile]
+                del new_hadd_list[idir]['ggh125_madgraph']
+    return new_hadd_list
 
 
 def rename_wh_zh(hadd_list, path):

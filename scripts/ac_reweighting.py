@@ -44,11 +44,13 @@ def process_dir(ifile, idir, temp_name, input_path, boilerplate):
     events = pandas.DataFrame(oldtree)
     signal_events = events[(events['is_signal'] > 0)]
 
+    drop_weights = [i for i in events.columns if 'wt_' in i]
     key, process = recognize_signal(ifile)
     weight_names = boilerplate[key][process]
     for weight, name in weight_names:
         weighted_signal_events = signal_events.copy(deep=True)
         weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
+        weighted_signal_events.drop(drop_weights, axis=1, inplace=True)
 
         output_name = '{}/{}.root'.format(temp_name, name) if '/hdfs' in input_path else '{}/merged/{}.root'.format(idir, name)
         with uproot.recreate(output_name) as f:
