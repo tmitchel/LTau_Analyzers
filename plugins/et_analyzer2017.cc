@@ -449,25 +449,6 @@ int main(int argc, char *argv[]) {
                 evtwt *= event.getVBFTheoryUnc(syst);
             }
 
-            // // recoil correction systematics
-            // if (syst.find("RecoilRes") != std::string::npos) {
-            //     if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
-            //         event.do_shift(true);
-            //     } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
-            //         event.do_shift(true);
-            //     } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
-            //         event.do_shift(true);
-            //     } else {
-            //         event.do_shift(false);
-            //     }
-            // }
-
-            // // MadGraph Higgs pT correction
-            // if (signal_type == "madgraph") {
-            //     mg_sf->var("HpT")->setVal(Higgs.Pt());
-            //     evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
-            // }
-
             auto efake_pt_shift(1.);
             if (syst.find("efaket_norm_ptgt50") != std::string::npos && tau.getPt() > 50) {
                 efake_pt_shift = (syst == "efaket_norm_ptgt50_Up" ? 1.1 : 0.9);
@@ -477,15 +458,6 @@ int main(int argc, char *argv[]) {
                 efake_pt_shift = (syst == "efaket_norm_pt30to40_Up" ? 1.1 : 0.9);
             }
             evtwt *= efake_pt_shift;
-
-            // // handle reading different m_sv values
-            // if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
-            //     (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
-            //     event.do_shift(true);
-            // } else {
-            //     event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
-            // }
-
         } else if (!isData && isEmbed) {
             event.setEmbed();
             // embedded cross-triggers not applied in skimmer
