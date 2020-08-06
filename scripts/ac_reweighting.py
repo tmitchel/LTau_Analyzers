@@ -18,14 +18,12 @@ def to_reweight(ifile):
     return False
 
 
-def recognize_signal(ifile, is2017):
+def recognize_signal(ifile):
     """Pick the correct keys for this sample."""
     process = ifile.split('/')[-1].split('125')[0]
     key = ''
-    if process == 'ggh' and is2017:
+    if process == 'ggh':
         key = 'mg_ac_reweighting_map'
-    elif process == 'ggh':
-        key = 'new_mg_ac_reweighting_map'
     else:
         key = 'jhu_ac_reweighting_map'
     return key, process
@@ -41,7 +39,7 @@ def parse_tree_name(keys):
         raise Exception('Can\'t find et_tree or mt_tree in keys: {}'.format(keys))
 
 
-def process_dir(ifile, idir, temp_name, input_path, is2017, boilerplate):
+def process_dir(ifile, idir, temp_name, input_path, boilerplate):
     open_file = uproot.open(ifile)
     tree_name = parse_tree_name(open_file.keys())
     oldtree = open_file[tree_name].arrays(['*'])
@@ -51,7 +49,7 @@ def process_dir(ifile, idir, temp_name, input_path, is2017, boilerplate):
     events = pandas.DataFrame(oldtree)
     signal_events = events[(events['is_signal'] > 0)]
 
-    key, process = recognize_signal(ifile, is2017)
+    key, process = recognize_signal(ifile)
     weight_names = boilerplate[key][process]
     for weight, name in weight_names:
         weighted_signal_events = signal_events.copy(deep=True)
@@ -97,7 +95,7 @@ def main(args):
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
         jobs = [
-            pool.apply_async(process_dir, (ifile, idir, temp_name, args.input, args.is2017, boilerplate))
+            pool.apply_async(process_dir, (ifile, idir, temp_name, args.input, boilerplate))
             for ifile in files
         ]
 
@@ -111,5 +109,4 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', required=True, help='path to input files')
-    parser.add_argument('--is2017', action='store_true', help='is this 2017?')
     main(parser.parse_args())

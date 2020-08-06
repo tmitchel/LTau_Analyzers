@@ -102,12 +102,6 @@
     },
     "mg_ac_reweighting_map": {
         "ggh": [
-            ["wt_ggh_a1", "reweighted_ggH_htt_0PM125"], ["wt_ggh_a3", "reweighted_ggH_htt_0M125"],
-            ["wt_ggh_a3int", "reweighted_ggH_htt_0Mf05ph0125"]
-        ]
-    },
-    "new_mg_ac_reweighting_map": {
-        "ggh": [
             ["sm_weight_nlo", "reweighted_ggH_htt_0PM125"], ["ps_weight_nlo", "reweighted_ggH_htt_0M125"],
             ["mm_weight_nlo", "reweighted_ggH_htt_0Mf05ph0125"]
         ]
