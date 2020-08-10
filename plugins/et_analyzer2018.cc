@@ -336,7 +336,7 @@ int main(int argc, char *argv[]) {
                     id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
-            if (tau.getDecayMode() == 5) {
+            if (tau.getGenMatch() == 5) {
                 evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
@@ -350,7 +350,7 @@ int main(int argc, char *argv[]) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
-            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
+            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
                 evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
@@ -482,7 +482,7 @@ int main(int argc, char *argv[]) {
                     id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
-            if (tau.getDecayMode() == 5) {
+            if (tau.getGenMatch() == 5) {
                 evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
