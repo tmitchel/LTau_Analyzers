@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
         if (i == progress * fraction) {
-            running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
+            running_log << "LOG: Processing: " << progress * 10 << "% complete. (" << i << " of " << nevts << " events.)" << std::endl;
             progress++;
         }
 
