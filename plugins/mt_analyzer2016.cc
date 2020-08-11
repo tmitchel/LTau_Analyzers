@@ -362,6 +362,10 @@ int main(int argc, char *argv[]) {
                 evtwt *= htt_sf->function(mu_fake_id_name.c_str())->getVal();
             }
 
+            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
+                evtwt *= htt_sf->function("t_id_vs_e_eta_vvloose")->getVal();
+            }
+
             // trigger scale factors
             if (muon.getPt() < 23) {
                 // muon leg with systematics
@@ -480,6 +484,10 @@ int main(int argc, char *argv[]) {
             }
             if (tau.getGenMatch() == 5) {
                 evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            }
+
+            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
+                evtwt *= htt_sf->function("t_id_vs_e_eta_vvloose")->getVal();
             }
 
             // trigger scale factors

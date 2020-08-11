@@ -371,6 +371,11 @@ int main(int argc, char *argv[]) {
                 evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
+            if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
+              evtwt *= htt_sf->function("t_id_vs_mu_eta_vloose")->getVal();
+            }
+
+
             // trigger scale factors
             if (electron.getPt() < 33) {
                 // electron leg with systematics
@@ -502,6 +507,25 @@ int main(int argc, char *argv[]) {
             if (tau.getGenMatch() == 5) {
                 evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
+
+            // electron fake rate SF
+            std::string e_fake_id_name = "t_id_vs_e_eta_tight";
+            if (syst.find("tau_id_el_disc") != std::string::npos) {
+                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
+                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
+                    e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
+            }
+            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
+                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+            }
+
+            if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
+              evtwt *= htt_sf->function("t_id_vs_mu_eta_vloose")->getVal();
+            }
+
 
             // trigger scale factors
             bool fireSingle = electron.getPt() > 28;
