@@ -81,7 +81,7 @@ def rename_wh_zh(hadd_list, path):
 
 def good_bkg(ifile):
     """Remove background files we don't want."""
-    if not 'EWK_W' in ifile and not 'EWKZ' in ifile and not 'WW_VV' in ifile and not 'WZ_VV' in ifile and not 'ZZ_VV' in ifile:
+    if not 'EWK_W' in ifile and not 'EWKZ' in ifile and not 'WW_VV' in ifile and not 'WZ_VV' in ifile and not 'ZZ_VV' in ifile and not 'evtgen' in ifile:
         return True
     return False
 
