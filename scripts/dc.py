@@ -78,13 +78,13 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
         raise Exception('Don\'t know how to handle DCP for provided zvar_name {}'.format(zvar_name))
 
     
-    data['final_evtwt'] = data['evtwt'].copy(deep=True) if fake_weight == None else data['evtwt'] * data[fake_weight]
+    data['final_evtwt'] = data['evtwt'].copy() if fake_weight == None else data['evtwt'] * data[fake_weight]
 
     if zvar_name == None:
       hists.fill(data[xvar_name].values, data[yvar_name].values, weight=data['final_evtwt'].values)
     else:
       for i, edge in enumerate(edges[1:]):
-        zevents = data[(data[zvar_name] > edges[i]) & (data[zvar_name] < edge)]
+        zevents = data[(data[zvar_name] > edges[i]) & (data[zvar_name] < edge)][[xvar_name, yvar_name, 'final_evtwt', dcp]]
         if DCP_idx == None:
           hists[i].fill(zevents[xvar_name].values, zevents[yvar_name].values, zevents['final_evtwt'].values) 
         else:
