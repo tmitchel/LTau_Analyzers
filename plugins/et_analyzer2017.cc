@@ -526,7 +526,6 @@ int main(int argc, char *argv[]) {
               evtwt *= htt_sf->function("t_id_vs_mu_eta_vloose")->getVal();
             }
 
-
             // trigger scale factors
             bool fireSingle = electron.getPt() > 28;
             bool fireCross = electron.getPt() < 28;
