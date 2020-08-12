@@ -246,10 +246,7 @@ def main(args):
     fout.Close()
 
     call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir), shell=True)
-
-    if '/hdfs' in args.input:
-        call('mv -v {}/jetFakes.root {}'.format(output_dir, args.input), shell=True)
-
+    call('mv -v {}/jetFakes.root {}'.format(output_dir, args.input), shell=True)
     print 'Finished in {} seconds'.format(time.time() - start)
 
 

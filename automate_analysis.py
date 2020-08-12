@@ -346,6 +346,7 @@ def main(args):
 
             names, signal_type = getNames(sample)
             # if signal_type != "minlo": continue
+            # if 'ZL' not in names: continue
             callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 

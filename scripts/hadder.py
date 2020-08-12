@@ -1,5 +1,6 @@
 
 import os
+import copy
 import json
 import multiprocessing
 from glob import glob
@@ -28,15 +29,10 @@ def do_hadd(hadd_list, path):
         commands = ['ahadd.py {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
                     for sample, files in isamples.items()]
 
-#         commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
-#                     for sample, files in isamples.items() if not 'wh125_JHU' in sample and not 'zh125_JHU' in sample]
-
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
         r = pool.map_async(os.system, commands)
         r.wait()
-        # for sample, files in isamples.items():
-        #     os.system('hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files)))
 
 
 def combine_wh(hadd_list, path):
@@ -51,6 +47,18 @@ def combine_wh(hadd_list, path):
         if len(wh_files) == 2:
             hadd_list[idir]['wh125_powheg'] = wh_files
     return hadd_list
+
+
+def split_madgraph(hadd_list):
+    new_hadd_list = copy.deepcopy(hadd_list.copy())
+    for idir in hadd_list.keys():
+        for sample, files in hadd_list[idir].iteritems():
+            if sample == 'ggh125_madgraph':
+                new_hadd_list[idir]['reweighted_ggH_htt_0PM125'] = [ifile for ifile in files if '_a1_' in ifile]
+                new_hadd_list[idir]['reweighted_ggH_htt_0M125'] = [ifile for ifile in files if '_a3_' in ifile]
+                new_hadd_list[idir]['reweighted_ggH_htt_0Mf05ph0125'] = [ifile for ifile in files if '_a3int_' in ifile]
+                del new_hadd_list[idir]['ggh125_madgraph']
+    return new_hadd_list
 
 
 def rename_wh_zh(hadd_list, path):
@@ -73,7 +81,7 @@ def rename_wh_zh(hadd_list, path):
 
 def good_bkg(ifile):
     """Remove background files we don't want."""
-    if not 'EWK_W' in ifile and not 'EWKZ' in ifile and not 'WW_VV' in ifile and not 'WZ_VV' in ifile and not 'ZZ_VV' in ifile:
+    if not 'EWK_W' in ifile and not 'EWKZ' in ifile and not 'WW_VV' in ifile and not 'WZ_VV' in ifile and not 'ZZ_VV' in ifile and not 'evtgen' in ifile:
         return True
     return False
 
@@ -90,11 +98,11 @@ def good_sig(ifile):
 def main(args):
     """Build list of files and hadd them together."""
     bkgs = [
-        'data_obs', 'embed', 
+        'data_obs', 'embed',
         'ZJ', 'ZTT', 'ZL',
-        'VVJ', 'VVT', 'VVL', 
-        'TTJ', 'TTT', 'TTL', 
-        'STJ', 'STT', 'STL', 
+        'VVJ', 'VVT', 'VVL',
+        'TTJ', 'TTT', 'TTL',
+        'STJ', 'STT', 'STL',
         'W',
     ]
     signals = [
@@ -120,6 +128,7 @@ def main(args):
     bkg_hadd_list = clean(bkg_hadd_list)
     sig_hadd_list = clean(sig_hadd_list)
     sig_hadd_list = combine_wh(sig_hadd_list, args.path)
+    sig_hadd_list = split_madgraph(sig_hadd_list)
 
     # keep list of what is being hadded together
     with file('haddlog.txt', 'a') as outfile:
@@ -134,9 +143,6 @@ def main(args):
             full_hadd_list[isyst][sample] = files
 
     do_hadd(full_hadd_list, args.path)
-    # do_hadd(bkg_hadd_list, args.path)
-    # do_hadd(sig_hadd_list, args.path)
-    # rename_wh_zh(sig_hadd_list, args.path)
 
 
 if __name__ == "__main__":

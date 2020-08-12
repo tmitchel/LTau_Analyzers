@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
         if (i == progress * fraction) {
-            running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
+            running_log << "LOG: Processing: " << progress * 10 << "% complete. (" << i << " of " << nevts << " events.)" << std::endl;
             progress++;
         }
 
@@ -371,6 +371,11 @@ int main(int argc, char *argv[]) {
                 evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
+            if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
+              evtwt *= htt_sf->function("t_id_vs_mu_eta_vloose")->getVal();
+            }
+
+
             // trigger scale factors
             if (electron.getPt() < 33) {
                 // electron leg with systematics
@@ -515,6 +520,10 @@ int main(int argc, char *argv[]) {
             }
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
                 evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+            }
+
+            if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
+              evtwt *= htt_sf->function("t_id_vs_mu_eta_vloose")->getVal();
             }
 
             // trigger scale factors

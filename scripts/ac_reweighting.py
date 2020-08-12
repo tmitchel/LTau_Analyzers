@@ -10,7 +10,6 @@ from subprocess import call
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
     for name in [
-        'ggh125_madgraph.root',
         'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root'
     ]:
         if name in ifile:
@@ -21,11 +20,7 @@ def to_reweight(ifile):
 def recognize_signal(ifile):
     """Pick the correct keys for this sample."""
     process = ifile.split('/')[-1].split('125')[0]
-    key = ''
-    if process == 'ggh':
-        key = 'mg_ac_reweighting_map'
-    else:
-        key = 'jhu_ac_reweighting_map'
+    key = 'jhu_ac_reweighting_map'
     return key, process
 
 
@@ -49,6 +44,7 @@ def process_dir(ifile, idir, temp_name, input_path, boilerplate):
     events = pandas.DataFrame(oldtree)
     signal_events = events[(events['is_signal'] > 0)]
 
+    drop_weights = [i for i in events.columns if 'wt_' in i]
     key, process = recognize_signal(ifile)
     weight_names = boilerplate[key][process]
     drop_weights = [i for i in events.columns if 'wt_' in i]
