@@ -38,19 +38,13 @@ met_factory::met_factory(TTree* input, int era, std::string syst)
     : syst_name_map{
           {"UncMet_Up", "UESUp"},
           {"UncMet_Down", "UESDown"},
-          {"JetRelBal_Up", "JetRelativeBalUp"},
-          {"JetRelBal_Down", "JetRelativeBalDown"},
-          {"JetJER_Up", "JERUp"},
-          {"JetJER_Down", "JERDown"},
       } {
     std::string met_name("met"), metphi_name("metphi");
     auto end = std::string::npos;
-    if (syst.find("Jet") != end && (syst.find("Up") != end || syst.find("Down") != end)) {
+    if (syst.find("UncMet") != end && (syst.find("Up") != end || syst.find("Down") != end)) {
         syst.erase(std::remove(syst.begin(), syst.end(), '_'), syst.end());
-        std::string syst_name = syst;
-        syst_name.erase(0, 3);
-        met_name += "_" + syst_name;
-        metphi_name += "_" + syst_name;
+        met_name += "_" + syst;
+        metphi_name += "_" + syst;
     }
 
     input->SetBranchAddress(met_name.c_str(), &met);
