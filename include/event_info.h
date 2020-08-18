@@ -154,6 +154,9 @@ std::string event_info::fix_syst_string(std::string syst) {
         base += "_LES_";
         base += (syst.find("DM0") != std::string::npos) ? "DM0_" : "DM1_";
         base += (syst.find("Up") != std::string::npos) ? "Up" : "Down";
+    } else if (syst.find("UES") != std::string::npos) {
+        base += "JetUES";
+        base += (syst.find("Up") != std::string::npos) ? "Up" : "Down";
     }
     return base;
 }
@@ -181,6 +184,9 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     } else if ((syst.find("DM0") != end || syst.find("DM1") != end)) {  // genuine tau ES
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
+    } else if (syst.find("UES") != end) {
+        m_sv_name += "_Jet" + syst;
+        pt_sv_name += "_Jet" + syst;
     } else if (syst.find("Jet") != end) {  // JECs
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
@@ -190,7 +196,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     } else if (syst.find("Recoil") != end) {  // recoil corrections
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-    }
+    } 
 
     input->SetBranchAddress(pt_sv_name.c_str(), &pt_sv);
     input->SetBranchAddress(m_sv_name.c_str(), &m_sv);

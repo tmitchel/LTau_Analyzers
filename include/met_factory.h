@@ -41,12 +41,12 @@ met_factory::met_factory(TTree* input, int era, std::string syst)
       } {
     std::string met_name("met"), metphi_name("metphi");
     auto end = std::string::npos;
-    if (syst.find("UncMet") != end && (syst.find("Up") != end || syst.find("Down") != end)) {
+    if (syst.find("UES") != end && (syst.find("Up") != end || syst.find("Down") != end)) {
         syst.erase(std::remove(syst.begin(), syst.end(), '_'), syst.end());
         met_name += "_" + syst;
         metphi_name += "_" + syst;
     }
-
+    
     input->SetBranchAddress(met_name.c_str(), &met);
     input->SetBranchAddress(metphi_name.c_str(), &metphi);
     input->SetBranchAddress("metSig", &metSig);

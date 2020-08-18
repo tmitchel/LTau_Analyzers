@@ -133,7 +133,7 @@ def getSyst(name, signal_type, exe, doSyst):
     if name != 'embed':
         # jet energy scale, unclustered MET, and JER
         systs += [
-            'UncMet_Up', 'UncMet_Down',
+            'UES_Up', 'UES_Down',
             'JetJER_Up', 'JetJER_Down',
             'JetAbsolute_Up', 'JetAbsolute_Down',
             'JetAbsoluteyear_Up', 'JetAbsoluteyear_Down',
