@@ -103,7 +103,7 @@ def parse_tree_name(keys):
 
 
 def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions, sample, doSysts=False):
-    ff_weighter = FFApplicationTool(fake_file, channel_prefix)
+    ff_weighter = FFApplicationTool(fake_file, channel_prefix, isDifferential=True) if channel_prefix == 'mt' else FFApplicationTool(fake_file, channel_prefix, isDifferential=False)
 
     open_file = uproot.open('{}/{}.root'.format(input_name, sample))
     events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
@@ -227,6 +227,13 @@ def main(args):
 
     output_dir = 'tmp/fakes_{}'.format(args.suffix)
     call('mkdir {}'.format(output_dir), shell=True)
+
+    # samples = [
+    #     'data_obs'
+    # ]
+
+    # jobs = [create_fakes(args.input, tree_name, channel_prefix, treedict,
+    #                                         output_dir, fake_file, fractions, sample, args.syst) for sample in samples]
 
     samples = [
         'data_obs', 'embed',
