@@ -160,19 +160,18 @@ def main(args):
 
     # create structure within output file
     vbf_categories = []
+    n_edges = len(vbf_cat_edges) - 1
+    DCP_idx = 0
     if 'D0_' in vbf_cat_edge_var:
-        vbf_categories += boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']
+        vbf_categories += boilerplate['vbf_sub_cats_plus'][:n_edges] + boilerplate['vbf_sub_cats_minus'][:n_edges]
+        DCP_idx  = n_edges - 1
     else:
-        vbf_categories += boilerplate['vbf_sub_cats']
+        vbf_categories += boilerplate['vbf_sub_cats'][:n_edges]
 
     for cat in boilerplate['categories'] + vbf_categories:
         output_file.cd()
         output_file.mkdir('{}_{}'.format(channel_prefix, cat))
     output_file.cd()
-
-    # use this once uproot supports sub-directories inside root files
-    # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
-    #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
     logging.basicConfig(filename='logs/2D_htt_{}_{}_{}_fa3_{}_{}{}.log'.format(channel_prefix,
                                                                                ztt_name, syst_name, args.year, date, args.suffix))
@@ -286,7 +285,7 @@ def main(args):
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
                 vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"]))
             fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                       edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                       edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=DCP_idx)
 
             output_file.Write()
 
@@ -323,7 +322,7 @@ def main(args):
                         vbf_cat_hists.append(build_histogram('jetFakes' + jet_postfix, vbf_cat_x_bins,
                                                              vbf_cat_y_bins, boilerplate["powheg_map"]))
                     fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                               edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                               edges=vbf_cat_edges, fake_weight=syst, DCP_idx=DCP_idx)
                     output_file.Write()
 
     output_file.Close()
