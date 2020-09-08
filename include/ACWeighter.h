@@ -36,7 +36,7 @@ class ACWeighter {
     TTree *weightTree;
     TFile *weightTreeFile;
     string ac_prefix;
-    string fileName = "/hdfs/store/user/tmitchel/HTT_AC_weights/";
+    string fileName = "root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_AC_weights/";
     string signal_type;
     unsigned int numWeightFiles;
     int foundEvents, crapEvents;  // hehe
