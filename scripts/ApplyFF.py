@@ -137,48 +137,22 @@ class FFApplicationTool():
             self.closure_met_0jet_qcd = self.theFMvisFile.Get('closure_met_'+channel+'_0jet_qcd')
 
     def get_raw_FF(self,pt,fct):
-        ff=1.0
-        ff=fct.Eval(pt)    
-        if(pt>100):
-            ff=fct.Eval(100)
-        return ff
+        return fct.Eval(min(100, pt))
 
     def get_mvis_closure(self,mvis,fct):
-        corr = 1.0
-        corr = fct.Eval(mvis)
-        if(mvis>250):
-            corr=fct.Eval(250)
-        #if (mvis<50):
-        #    corr=fct.Eval(50)
-        return corr
+        return fct.Eval(min(250, mvis))
 
     def get_mt_closure(self,mt, fct):
-        corr=1.0
-        corr=fct.Eval(mt)
-        #if (mt>120):
-        #    corr=fct.Eval(120)
-        return corr
+        return fct.Eval(mt)
 
     def get_lpt_closure(self,lpt,fct):
-        corr = 1.0
-        #print(lpt)
-        #print(fct)
-        corr = fct.Eval(lpt)
-        if (lpt>150):
-            corr = fct.Eval(150)
-        return corr
+        return fct.Eval(min(150, lpt))
 
     def get_dr_closure(self,dr,fct):
-        corr = 1.0
-        corr = fct.Eval(dr)
-        return corr
+        return fct.Eval(dr)
 
     def get_MET_closure(self,met,fct):
-        corr = 1.0
-        corr = fct.Eval(met)
-        if corr < 0:
-            corr = 0
-        return corr
+        return fct.Eval(max(0, met))
         
 
     def get_ff(self, pt, mt, mvis, lpt, dr, met, njets, xtrg, frac_tt, frac_qcd, frac_w, unc='',upOrDown=''):
