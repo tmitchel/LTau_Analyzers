@@ -79,10 +79,10 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst)
           {"JetJER_Down", "JERDown"},
       } {
     std::string mjj_name("vbfMass"), njets_name("jetVeto30");
-    if (era == 2017) {
-        mjj_name += "WoNoisyJets";
-        njets_name += "WoNoisyJets";
-    }
+    // if (era == 2017) {
+    //     mjj_name += "WoNoisyJets";
+    //     njets_name += "WoNoisyJets";
+    // }
 
     auto end = std::string::npos;
     if (syst.find("Jet") != end) {
