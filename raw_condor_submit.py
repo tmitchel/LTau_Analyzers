@@ -74,7 +74,7 @@ tar xvzf ana_code.tar.gz \n'''.format(config_dir)
         bash_name = '{}/submit_{}_{}_{}.sh'.format(exe_dir, config['sample'], config['name'], config['syst'])
         bashScript = bashScriptSetup + config['command'] + '\n'
         bashScript += 'mkdir -p /hdfs/store/user/{}/{}/{} \n'.format(pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
-        bashScript += 'cp -v *_output.root /hdfs/store/user/{}/{}/{}/ \n'.format(
+        bashScript += 'xrdcp *_output.root root://cmsxrootd.hep.wisc.edu:1094//store/user/{}/{}/{}/ \n'.format(
             pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
         with open(bash_name, 'w') as file:
             file.write(bashScript)
