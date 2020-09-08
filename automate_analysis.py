@@ -300,7 +300,7 @@ def main(args):
         job_map = {}
         for ifile in fileList:
             sample = ifile.split('/')[-1].split(suffix)[0]
-            tosample = ifile.replace(sample+suffix, '')
+            tosample = ifile.replace(sample+suffix, '').replace('/hdfs', 'root://cmsxrootd.hep.wisc.edu:1094/')
             names, signal_type = getNames(sample)
             file_map = defaultdict(list)
             for name in names:
@@ -342,7 +342,7 @@ def main(args):
         processes = []
         for ifile in fileList:
             sample = ifile.split('/')[-1].split(suffix)[0]
-            tosample = ifile.replace(sample+suffix, '')
+            tosample = ifile.replace(sample+suffix, '').replace('/hdfs', 'root://cmsxrootd.hep.wisc.edu:1094/')
 
             names, signal_type = getNames(sample)
             # if signal_type != "minlo": continue
