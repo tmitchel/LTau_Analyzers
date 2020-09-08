@@ -41,6 +41,16 @@ def getNames(sample):
         names = ['ttH125']
     elif 'embed' in sample:
         names = ['embed']
+    elif 'ggHtoWW' in sample:
+        names = ['ggH_hww125']
+    elif 'VBFtoWW' in sample:
+        names = ['qqH_hww125']
+    elif 'HWminusJtoWW' in sample or 'HWplusJtoWW':
+        names = ['WH_signed_hww125']
+    elif 'HZJtoWW' in sample:
+        names = ['HZJtoWW']
+    elif 'ggZHtoWW' in sample:
+        names = ['ZH_hww125']
     else:
         names = ['VVJ', 'VVT', 'VVL']
 
@@ -59,7 +69,7 @@ def getNames(sample):
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
-    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
+    invalid_samples = ['EWKZ', 'EWKW', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
     for sample in invalid_samples:
         if sample in ifile:
             return False

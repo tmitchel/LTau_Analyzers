@@ -93,6 +93,12 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                      {"ggh125_madgraph_two_a1_filtered", 0.1383997884},
                      {"ggh125_madgraph_two_a3_filtered", 0.1336590511},
                      {"ggh125_madgraph_two_a3int_filtered", 0.1375149881},
+                     {"ggHtoWW", 1.154},
+                     {"ggZHtoWW", 0.0262},
+                     {"HWminusJtoWW", 0.114},
+                     {"HWplusJtoWW", 0.180},
+                     {"HZJtoWW", 0.7612 * 0.2137},
+                     {"VBFtoWW", 0.0897},
                      {"tth125", 0.5071 * 0.0627},
                      {"wh125", 0.6864 * 0.0627},  // took the average of W+ and W-. Not important because for JHU it's reweighted to Powheg anyways
                      {"wminus125", 0.5328 * 0.0627},
