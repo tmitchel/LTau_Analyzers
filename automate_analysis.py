@@ -45,7 +45,7 @@ def getNames(sample):
         names = ['ggH_hww125']
     elif 'VBFtoWW' in sample:
         names = ['qqH_hww125']
-    elif 'HWminusJtoWW' in sample or 'HWplusJtoWW':
+    elif 'HWminusJtoWW' in sample or 'HWplusJtoWW' in sample:
         names = ['WH_signed_hww125']
     elif 'HZJtoWW' in sample:
         names = ['HZJtoWW']

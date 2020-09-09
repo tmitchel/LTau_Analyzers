@@ -98,6 +98,7 @@ def good_sig(ifile):
 def main(args):
     """Build list of files and hadd them together."""
     bkgs = [
+        'ggH_hww125', 'qqH_hww125', 'HZJtoWW', 'ZH_hww125', 'WH_signed_hww125'
         'data_obs', 'embed',
         'ZJ', 'ZTT', 'ZL',
         'VVJ', 'VVT', 'VVL',
