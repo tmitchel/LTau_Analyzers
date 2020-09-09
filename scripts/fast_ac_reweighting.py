@@ -33,8 +33,12 @@ def main(args):
         i += 1
         print '\n\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
         for ifile in files:
-            call('bin/ac-reweight -n {} -t {} -o {}'.format(ifile, args.tree_name, temp_name), shell=True)
-            call('mv -v {} {}'.format(ifile, ifile + "/../"), shell=True) # move from "merged" to parent directory
+            if '/hdfs' in args.input:
+                call('bin/ac-reweight -n {} -t {} -o {}/{}/merged'.format(ifile, args.tree_name, temp_name, idir.split('/')[-1]), shell=True)
+            else:
+                call('bin/ac-reweight -n {} -t {} -o {}/merged'.format(ifile, args.tree_name, idir), shell=True)
+            fname = ifile.split('/')[-1]
+            call('mv -v {} {}'.format(ifile, ifile.replace(fname, '') + "/../"), shell=True) # move from "merged" to parent directory
 
 
 if __name__ == "__main__":
