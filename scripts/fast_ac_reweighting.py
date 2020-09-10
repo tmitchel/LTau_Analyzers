@@ -35,11 +35,11 @@ def main(args):
         for ifile in tqdm(files, leave=False):
             if '/hdfs' in args.input:
                 call('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True)
-                call('mv {}/*.root {}'.format(temp_name, ifile.split('/')[-1]), shell=True)
+                call('mv {}/*.root {}'.format(temp_name, idir), shell=True)
             else:
                 call('bin/ac-reweight -n {} -t {} -o {}/merged'.format(ifile, args.tree_name, idir), shell=True)
             fname = ifile.split('/')[-1]
-            call('mv -v {} {}'.format(ifile, ifile.replace(fname, '/merged')), shell=True) # move from "merged" to parent directory
+            call('mv {} {}'.format(ifile, ifile.replace(fname, '/merged')), shell=True) # move from "merged" to parent directory
 
 
 if __name__ == "__main__":
