@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
             new_evtwt = evtwt * coupling_weight;  // new event weight for this coupling scenario
             new_evtwt_branch->Fill();
         }
+        counts->Write();
         new_tree->Write();
         fout->Close();
     }
