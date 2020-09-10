@@ -31,7 +31,6 @@ def main(args):
     ndir = len(input_files.keys())
     for idir, files in tqdm(input_files.iteritems()):
         i += 1
-        print '\n\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
         for ifile in tqdm(files, leave=False):
             if '/hdfs' in args.input:
                 call('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True)
