@@ -31,13 +31,14 @@ def main(args):
     pbar = tqdm(input_files.items())
     for idir, files in pbar:
         pbar.set_description('Processing: {}'.format(idir.split('/')[-1]))
-            procs = [Popen('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True) for ifile in files]
-            for p in procs:
-              p.wait()
-            call('mv {}/*.root {}'.format(temp_name, idir), shell=True)
-            procs = [Popen('mv {} {}'.format(ifile, ifile.replace('merged', '')), shell=True) for ifile in files] # move from "merged" to parent directory
-            for p in procs:
-              p.wait()
+        procs = [Popen('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True) for ifile in files]
+        for p in procs:
+          p.wait()
+        call('mv {}/*.root {}/merged'.format(temp_name, idir), shell=True)
+        procs = [Popen('mv {} {}'.format(ifile, ifile.replace('merged', '')), shell=True) for ifile in files] # move from "merged" to parent directory
+        for p in procs:
+          p.wait()
+
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
