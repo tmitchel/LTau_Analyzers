@@ -15,8 +15,8 @@ def to_reweight(ifile):
     return False
 
 
-def call_cmd(cmd):
-    call(cmd, shell=True)
+def call_cmd(ifile, tree_name, temp_name, syst_dir):
+    call('bin/ac-reweight -n {} -t {} -o {}/{}'.format(ifile, tree_name, temp_name, syst_dir), shell=True)
     return None
 
 
@@ -39,17 +39,19 @@ def main(args):
 
     ndir = len(input_files.keys())
     pbar = tqdm(input_files.items())
+    jobs = []
     for idir, files in pbar:
         pbar.set_description('Starting: {}'.format(idir.split('/')[-1]))
         syst_dir = idir.split('/')[-1]
         call('mkdir -p {}/{}'.format(temp_name, syst_dir), shell=True)
 
         # start reweighting things and wait to complete
-        jobs = [
-            pool.apply_async(call_cmd, ('bin/ac-reweight -n {} -t {} -o {}/{}'.format(ifile, args.tree_name, temp_name, syst_dir))) for ifile in files
-        ]
+        jobs.append([
+            pool.apply_async(call_cmd, (ifile, args.tree_name, temp_name, syst_dir)) for ifile in files
+        ])
 
     # make sure everything in the pool is finished
+    [j.get() for job in jobs for j in job]
     print 'Waiting for processes to finish...'
     pool.close()
     pool.join()
