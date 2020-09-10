@@ -19,6 +19,8 @@ def main(args):
         idir: [ifile for ifile in glob('{}/merged/*.root'.format(idir)) if to_reweight(ifile)]
         for idir in input_directories
     }
+    input_files = dict(filter(lambda x: len(x) > 0, input_files.items()))
+
     print 'Directory structure to process'
     pprint(input_files, width=150)
 
