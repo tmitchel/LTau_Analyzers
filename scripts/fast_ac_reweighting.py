@@ -16,16 +16,9 @@ def to_reweight(ifile):
     return False
 
 
-def recognize_signal(ifile):
-    """Pick the correct keys for this sample."""
-    process = ifile.split('/')[-1].split('125')[0]
-    key = 'jhu_ac_reweighting_map'
-    return key, process
-
-
-def call_cmd(ifile, tree_name, temp_name, syst_dir, weight, name, queue):
-    call('bin/ac-reweight -n {} -t {} -o {}/{}/{}.root -w {}'.format(ifile,
-                                                                     tree_name, temp_name, syst_dir, name, weight), shell=True)
+def call_cmd(ifile, tree_name, temp_name, syst_dir, queue):
+    call('bin/ac-reweight -n {} -t {} -o {}/{}/'.format(ifile,
+                                                        tree_name, temp_name, syst_dir), shell=True)
     queue.put(0)
     return None
 
@@ -41,12 +34,8 @@ def listener(q, report):
         elif m > 1:
             total = m
             pbar = tqdm(total=total)
-            # print '{} jobs to process'.format(total)
-        else: 
-          pbar.update(1)
-        # complete.append(1)
-        # if len(complete) % report == 0:
-        #     print '{} of {} jobs complete'.format(len(complete), total)
+        else:
+            pbar.update(1)
 
 
 def main(args):
@@ -59,10 +48,6 @@ def main(args):
 
     print 'Directory structure to process'
     pprint(input_files, width=150)
-
-    boilerplate = {}
-    with open('configs/boilerplate.json', 'r') as config_file:
-        boilerplate = json.load(config_file)
 
     temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
     call('mkdir -p {}'.format(temp_name), shell=True)
@@ -81,18 +66,14 @@ def main(args):
         syst_dir = idir.split('/')[-1]
         call('mkdir -p {}/{}'.format(temp_name, syst_dir), shell=True)
 
-        for ifile in files:
-            key, process = recognize_signal(ifile)
-            weight_names = boilerplate[key][process]
-
-            # start reweighting things and wait to complete
-            jobs.append([
-                pool.apply_async(call_cmd, (ifile, args.tree_name, temp_name, syst_dir, weight, name, q)) for weight, name in weight_names
-            ])
+        # start reweighting things and wait to complete
+        jobs = jobs + [
+            pool.apply_async(call_cmd, (ifile, args.tree_name, temp_name, syst_dir, q)) for ifile in files
+        ]
 
     # make sure everything in the pool is finished
-    q.put(len([1 for job in jobs for j in job]))
-    all_jobs = [j.get() for job in jobs for j in job]
+    q.put(len(jobs))
+    all_jobs = [job.get() for job in jobs]
     print 'Waiting for processes to finish...'
     pool.close()
     pool.join()
