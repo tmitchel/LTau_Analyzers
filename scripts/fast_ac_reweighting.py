@@ -23,9 +23,30 @@ def recognize_signal(ifile):
     return key, process
 
 
-def call_cmd(ifile, tree_name, temp_name, syst_dir, weight, name):
-    call('bin/ac-reweight -n {} -t {} -o {}/{}/{}.root -w {}'.format(ifile, tree_name, temp_name, syst_dir, name, weight), shell=True)
+def call_cmd(ifile, tree_name, temp_name, syst_dir, weight, name, queue):
+    call('bin/ac-reweight -n {} -t {} -o {}/{}/{}.root -w {}'.format(ifile,
+                                                                     tree_name, temp_name, syst_dir, name, weight), shell=True)
+    queue.put(0)
     return None
+
+
+def listener(q, report):
+    """Listen for messages on q then writes to file."""
+    complete = []
+    total = -1
+    while 1:
+        m = q.get()
+        if m == 'kill':
+            break
+        elif m > 1:
+            total = m
+            pbar = tqdm(total=total)
+            # print '{} jobs to process'.format(total)
+        else: 
+          pbar.update(1)
+        # complete.append(1)
+        # if len(complete) % report == 0:
+        #     print '{} of {} jobs complete'.format(len(complete), total)
 
 
 def main(args):
@@ -48,6 +69,9 @@ def main(args):
 
     n_processes = min(8, multiprocessing.cpu_count() / 2)
     pool = multiprocessing.Pool(processes=n_processes)
+    manager = multiprocessing.Manager()
+    q = manager.Queue()
+    watcher = pool.apply_async(listener, (q, 10))
 
     ndir = len(input_files.keys())
     pbar = tqdm(input_files.items())
@@ -63,11 +87,12 @@ def main(args):
 
             # start reweighting things and wait to complete
             jobs.append([
-                pool.apply_async(call_cmd, (ifile, args.tree_name, temp_name, syst_dir, weight, name)) for weight, name in weight_names
+                pool.apply_async(call_cmd, (ifile, args.tree_name, temp_name, syst_dir, weight, name, q)) for weight, name in weight_names
             ])
 
     # make sure everything in the pool is finished
-    [j.get() for job in jobs for j in job]
+    q.put(len([1 for job in jobs for j in job]))
+    all_jobs = [j.get() for job in jobs for j in job]
     print 'Waiting for processes to finish...'
     pool.close()
     pool.join()
