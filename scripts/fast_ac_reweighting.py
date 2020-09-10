@@ -37,7 +37,7 @@ def main(args):
         for ifile in files:
             if '/hdfs' in args.input:
                 call('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True)
-                call('mv {}/*.root {}'.format(temp_name, idir), shell=True)
+                call('mv {}/*.root {}/merged/'.format(temp_name, idir), shell=True)
             else:
                 call('bin/ac-reweight -n {} -t {} -o {}/merged'.format(ifile, args.tree_name, idir), shell=True)
             fname = ifile.split('/')[-1]

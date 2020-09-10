@@ -58,7 +58,6 @@ int main(int argc, char *argv[]) {
         // copy old file EXCEPT evtwt branch
         tree->SetBranchStatus("evtwt", 0);
         auto new_tree = tree->CloneTree(-1, "fast");
-        tree->SetBranchStatus("*", 0);
         tree->SetBranchStatus("evtwt", 1);
 
         // create new evtwt in new tree
