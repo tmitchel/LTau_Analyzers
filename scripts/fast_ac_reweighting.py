@@ -1,7 +1,7 @@
 from glob import glob
+from tqdm import tqdm
 from pprint import pprint
 from subprocess import call
-
 
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
@@ -29,10 +29,10 @@ def main(args):
 
     i = 0
     ndir = len(input_files.keys())
-    for idir, files in input_files.iteritems():
+    for idir, files in tqdm(input_files.iteritems()):
         i += 1
         print '\n\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
-        for ifile in files:
+        for ifile in tqdm(files, leave=False):
             if '/hdfs' in args.input:
                 call('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True)
                 call('mv {}/*.root {}'.format(temp_name, ifile.split('/')[-1]), shell=True)
