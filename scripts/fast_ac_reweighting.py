@@ -29,16 +29,17 @@ def main(args):
 
     i = 0
     ndir = len(input_files.keys())
-    for idir, files in tqdm(input_files.iteritems()):
-        i += 1
-        for ifile in tqdm(files, leave=False):
+    pbar = tqdm(input_files.items())
+    for idir, files in pbar:
+        pbar.set_description('Processing: {}'.format(idir.split('/')[-1]))
+        for ifile in files:
             if '/hdfs' in args.input:
                 call('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True)
                 call('mv {}/*.root {}'.format(temp_name, idir), shell=True)
             else:
                 call('bin/ac-reweight -n {} -t {} -o {}/merged'.format(ifile, args.tree_name, idir), shell=True)
             fname = ifile.split('/')[-1]
-            call('mv {} {}'.format(ifile, ifile.replace(fname, '/merged')), shell=True) # move from "merged" to parent directory
+            call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True) # move from "merged" to parent directory
 
 
 if __name__ == "__main__":
