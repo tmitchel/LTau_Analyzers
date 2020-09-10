@@ -1,3 +1,4 @@
+import json
 import multiprocessing
 from glob import glob
 from tqdm import tqdm
@@ -15,8 +16,15 @@ def to_reweight(ifile):
     return False
 
 
-def call_cmd(ifile, tree_name, temp_name, syst_dir):
-    call('bin/ac-reweight -n {} -t {} -o {}/{}'.format(ifile, tree_name, temp_name, syst_dir), shell=True)
+def recognize_signal(ifile):
+    """Pick the correct keys for this sample."""
+    process = ifile.split('/')[-1].split('125')[0]
+    key = 'jhu_ac_reweighting_map'
+    return key, process
+
+
+def call_cmd(ifile, tree_name, temp_name, syst_dir, weight, name):
+    call('bin/ac-reweight -n {} -t {} -o {}/{}/{}.root -w {}'.format(ifile, tree_name, temp_name, syst_dir, name, weight), shell=True)
     return None
 
 
@@ -30,6 +38,10 @@ def main(args):
 
     print 'Directory structure to process'
     pprint(input_files, width=150)
+
+    boilerplate = {}
+    with open('configs/boilerplate.json', 'r') as config_file:
+        boilerplate = json.load(config_file)
 
     temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
     call('mkdir -p {}'.format(temp_name), shell=True)
@@ -45,10 +57,14 @@ def main(args):
         syst_dir = idir.split('/')[-1]
         call('mkdir -p {}/{}'.format(temp_name, syst_dir), shell=True)
 
-        # start reweighting things and wait to complete
-        jobs.append([
-            pool.apply_async(call_cmd, (ifile, args.tree_name, temp_name, syst_dir)) for ifile in files
-        ])
+        for ifile in files:
+            key, process = recognize_signal(ifile)
+            weight_names = boilerplate[key][process]
+
+            # start reweighting things and wait to complete
+            jobs.append([
+                pool.apply_async(call_cmd, (ifile, args.tree_name, temp_name, syst_dir, weight, name)) for weight, name in weight_names
+            ])
 
     # make sure everything in the pool is finished
     [j.get() for job in jobs for j in job]
