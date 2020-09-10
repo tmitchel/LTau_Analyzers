@@ -1,7 +1,7 @@
 from glob import glob
 from tqdm import tqdm
 from pprint import pprint
-from subprocess import call
+from subprocess import call, Popen
 
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
@@ -19,30 +19,25 @@ def main(args):
         idir: [ifile for ifile in glob('{}/merged/*.root'.format(idir)) if to_reweight(ifile)]
         for idir in input_directories
     }
-    input_files = dict(filter(lambda x: len(x) > 0, input_files.items()))
+    input_files = dict(filter(lambda x: len(x[1]) > 0, input_files.items()))
 
     print 'Directory structure to process'
     pprint(input_files, width=150)
 
-    temp_name = args.input
-    if '/hdfs' in temp_name:
-        temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
-        call('mkdir -p {}'.format(temp_name), shell=True)
+    temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
+    call('mkdir -p {}'.format(temp_name), shell=True)
 
-    i = 0
     ndir = len(input_files.keys())
     pbar = tqdm(input_files.items())
     for idir, files in pbar:
         pbar.set_description('Processing: {}'.format(idir.split('/')[-1]))
-        for ifile in files:
-            if '/hdfs' in args.input:
-                call('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True)
-                call('mv {}/*.root {}'.format(temp_name, idir), shell=True)
-            else:
-                call('bin/ac-reweight -n {} -t {} -o {}/merged'.format(ifile, args.tree_name, idir), shell=True)
-            fname = ifile.split('/')[-1]
-            call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True) # move from "merged" to parent directory
-
+            procs = [Popen('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name), shell=True) for ifile in files]
+            for p in procs:
+              p.wait()
+            call('mv {}/*.root {}'.format(temp_name, idir), shell=True)
+            procs = [Popen('mv {} {}'.format(ifile, ifile.replace('merged', '')), shell=True) for ifile in files] # move from "merged" to parent directory
+            for p in procs:
+              p.wait()
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
