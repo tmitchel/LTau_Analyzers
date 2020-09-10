@@ -40,23 +40,27 @@ def main(args):
     ndir = len(input_files.keys())
     pbar = tqdm(input_files.items())
     for idir, files in pbar:
-        pbar.set_description('Processing: {}'.format(idir.split('/')[-1]))
+        pbar.set_description('Starting: {}'.format(idir.split('/')[-1]))
+        syst_dir = idir.split('/')[-1]
+        call('mkdir -p {}/{}'.format(temp_name, syst_dir), shell=True)
+
         # start reweighting things and wait to complete
         jobs = [
-            pool.apply_async(call_cmd, ('bin/ac-reweight -n {} -t {} -o {}/'.format(ifile, args.tree_name, temp_name))) for ifile in files
+            pool.apply_async(call_cmd, ('bin/ac-reweight -n {} -t {} -o {}/{}'.format(ifile, args.tree_name, temp_name, syst_dir))) for ifile in files
         ]
-        [j.wait() for j in jobs]
-
-        # move output files
-        call('mv {}/*.root {}/merged'.format(temp_name, idir), shell=True)
-        procs = [Popen('mv {} {}'.format(ifile, ifile.replace('merged', '')), shell=True)
-                 for ifile in files]  # move from "merged" to parent directory
-        for p in procs:
-            p.wait()
 
     # make sure everything in the pool is finished
+    print 'Waiting for processes to finish...'
     pool.close()
     pool.join()
+
+    # move output files
+    out_dirs = [idir for idir in glob('{}/'.format(temp_name))]
+    pbar = tqdm(out_dirs)
+    for idir in pbar:
+        pbar.set_description('Moving: {}'.format(idir.split('/')[-1]))
+        to_name = idir.replace('tmp/', '/hdfs/store/user/tmitchel/')
+        call('mv {}/*.root {}/merged/'.format(idir, to_name), shell=True)
 
 
 if __name__ == "__main__":
