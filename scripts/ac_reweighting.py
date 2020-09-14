@@ -4,6 +4,7 @@ import pprint
 import uproot
 import multiprocessing
 from glob import glob
+from tqdm import tqdm
 from subprocess import call
 
 
@@ -59,10 +60,10 @@ def process_dir(ifile, idir, temp_name, input_path, boilerplate):
             f[tree_name].extend(weighted_signal_events.to_dict('list'))
         
         if '/hdfs' in input_path:
-            print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
+            # print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
             call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
 
-    print 'Moving {} to {}'.format(ifile, ifile.replace('/merged', ''))
+    # print 'Moving {} to {}'.format(ifile, ifile.replace('/merged', ''))
     call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)
     return None
 
@@ -85,11 +86,9 @@ def main(args):
         temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
         call('mkdir -p {}'.format(temp_name), shell=True)
 
-    i = 0
-    ndir = len(input_files.keys())
-    for idir, files in input_files.iteritems():
-        i += 1
-        print '\n\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
+    pbar = tqdm(input_files.items())
+    for idir, files in pbar:
+        pbar.set_description('Processing: {}'.format(idir.split('/')[-1]))
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
         jobs = [
@@ -100,7 +99,7 @@ def main(args):
         [j.get() for j in jobs]
         pool.close()
         pool.join()
-        print 'All files written for {}'.format(idir)
+        # print 'All files written for {}'.format(idir)
 
 
 if __name__ == "__main__":
