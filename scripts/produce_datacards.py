@@ -9,6 +9,7 @@ import datetime
 from glob import glob
 from array import array
 from pprint import pprint
+from tqdm import tqdm
 
 
 def build_filelist(input_dir):
@@ -65,35 +66,34 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     Returns:
     hists -- filled histograms
     """
+    data = data.dropna(subset=['MELA_D2j'])
     evtwt = data['evtwt'].to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
-    if zvar_name == 'D0_ggH':
+    dcp_name = None
+    if xvar_name == 'D0_ggH':
         dcp = data['DCP_ggH'].values
-    elif zvar_name == 'D0_VBF':
+    elif xvar_name == 'D0_VBF':
         dcp = data['DCP_VBF'].values
-    elif zvar_name == 'D_a2_VBF' or zvar_name == 'D_l1_VBF' or zvar_name == 'D_l1zg_VBF':
+    elif xvar_name == 'D_a2_VBF' or xvar_name == 'D_l1_VBF' or xvar_name == 'D_l1zg_VBF':
         DCP_idx = None  # DCP binning is only used when measuring fa3
     elif zvar_name != None:
-        raise Exception('Don\'t know how to handle DCP for provided zvar_name {}'.format(zvar_name))
+        raise Exception('Don\'t know how to handle DCP for provided xvar_name {}'.format(xvar_name))
 
     if fake_weight != None:
         evtwt *= data[fake_weight].values
 
+    if zvar_name != None:
+        vbf_cat = pandas.cut(data[zvar_name], bins=edges, labels=range(len(edges) - 1), include_lowest=True, right=True).values
+    
     for i in xrange(len(data.index)):
         if zvar_name != None:
-            for j, edge in enumerate(edges[1:]):  # remove lowest left edge
-                if zvar[i] < edge:
-                    if DCP_idx == None:
-                        hists[j].Fill(xvar[i], yvar[i], evtwt[i])
-                    else:
-                        if dcp[i] > 0:
-                            hists[j].Fill(xvar[i], yvar[i], evtwt[i])
-                        else:
-                            # DCP minus bins are offset by DCP_idx
-                            hists[j+DCP_idx].Fill(xvar[i], yvar[i], evtwt[i])
-                    break
+            hists[-1].Fill(xvar[i], yvar[i], evtwt[i])
+            idx = vbf_cat[i]
+            if DCP_idx != None and dcp[i] < 0:
+                idx += DCP_idx
+            hists[int(idx)].Fill(xvar[i], yvar[i], evtwt[i])
         else:
             hists.Fill(xvar[i], yvar[i], evtwt[i])
 
@@ -164,7 +164,7 @@ def main(args):
     DCP_idx = 0
     if 'D0_' in vbf_cat_edge_var:
         vbf_categories += boilerplate['vbf_sub_cats_plus'][:n_edges] + boilerplate['vbf_sub_cats_minus'][:n_edges]
-        DCP_idx  = n_edges - 1
+        DCP_idx  = n_edges
     else:
         vbf_categories += boilerplate['vbf_sub_cats'][:n_edges]
 
@@ -175,13 +175,12 @@ def main(args):
 
     logging.basicConfig(filename='logs/2D_htt_{}_{}_{}_fa3_{}_{}{}.log'.format(channel_prefix,
                                                                                ztt_name, syst_name, args.year, date, args.suffix))
-    nsysts = len(filelist.keys())
-    idx = -1
-    for syst, files in filelist.iteritems():
+    
+    pbar = tqdm(filelist.items())
+    for syst, files in pbar:
+        pbar.set_description('Processing: {}'.format(syst))
         if not args.syst and syst != 'nominal':
             continue
-        idx += 1
-        print 'Processing syst {} ({} of {})'.format(syst, idx, nsysts)
         postfix = get_syst_name(channel_prefix, syst, syst_name_map)
         if postfix == 'unknown':  # skip unknown systematics
             continue
@@ -191,7 +190,7 @@ def main(args):
         postfix = postfix.replace('CHAN', 'et') if channel_prefix == 'et' else postfix.replace('CHAN', 'mt')
         stable_postfix = postfix
 
-        for ifile in files:
+        for ifile in tqdm(files, leave=False):
             # handle ZTT vs embedded
             if args.embed and 'ZTT' in ifile:
                 continue
@@ -274,14 +273,14 @@ def main(args):
             boost_hist = build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost, boilerplate["powheg_map"])
             boost_hist = fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=fweight)
 
-            output_file.cd('{}_vbf'.format(channel_prefix))
-            vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"])
-            vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var,
-                                  vbf_cat_y_var, fake_weight=fweight)
+            # output_file.cd('{}_vbf'.format(channel_prefix))
+            # vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"])
+            # vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var,
+            #                       vbf_cat_y_var, fake_weight=fweight)
 
             # vbf sub-categories event after normal vbf categories
             vbf_cat_hists = []
-            for cat in vbf_categories:
+            for cat in vbf_categories + ['vbf']:
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
                 vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"]))
             fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
@@ -310,14 +309,14 @@ def main(args):
                                                  higgs_pT_bins_boost, m_sv_bins_boost, boilerplate["powheg_map"])
                     boost_hist = fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=syst)
 
-                    output_file.cd('{}_vbf'.format(channel_prefix))
-                    vbf_hist = build_histogram('jetFakes{}'.format(
-                        jet_postfix), vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"])
-                    vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var, fake_weight=syst)
+                    # output_file.cd('{}_vbf'.format(channel_prefix))
+                    # vbf_hist = build_histogram('jetFakes{}'.format(
+                    #     jet_postfix), vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"])
+                    # vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var, fake_weight=syst)
 
                     # vbf sub-categories event after normal vbf categories
                     vbf_cat_hists = []
-                    for cat in vbf_categories:
+                    for cat in vbf_categories + ['vbf']:
                         output_file.cd('{}_{}'.format(channel_prefix, cat))
                         vbf_cat_hists.append(build_histogram('jetFakes' + jet_postfix, vbf_cat_x_bins,
                                                              vbf_cat_y_bins, boilerplate["powheg_map"]))

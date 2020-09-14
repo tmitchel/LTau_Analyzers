@@ -92,6 +92,53 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     return weights
 
 
+def encode_categories(data, channel):
+    def cats(row):
+        if row.njets == 0:
+            return channel + '_0jet'
+        elif row.njets > 1 and row.mjj > 300:
+          return channel + '_vbf'
+        else:
+            return channel + '_boosted'
+
+    return data.apply(cats, axis=1)
+
+
+def get_weights(df, fake_weights, fractions, channel, doSyst=False):
+    """Read input variables and fake fractions to get the correct fake weight."""
+    categories = encode_categories(df[['njets', 'mjj']], channel)
+    if channel == 'et':
+        pt_name = 'el_pt'
+    else:
+        pt_name = 'mu_pt'
+
+    weights = {'fake_weight': numpy.empty(len(categories))}
+    if doSyst:
+        for syst in systs:
+            weights[syst[0] + "_" + syst[1]] = numpy.empty(len(categories))
+
+    for i, cat in enumerate(categories.values):
+        if i % 10000 == 0:
+          print '{} of {} events'.format(i, len(categories.values))
+        xbin = fractions['frac_data'][cat].GetXaxis().FindBin(df.vis_mass.iloc[i])
+        ybin = fractions['frac_data'][cat].GetYaxis().FindBin(df.njets.iloc[i])
+        frac_tt = fractions['frac_tt'][cat].GetBinContent(xbin, ybin)
+        frac_qcd = fractions['frac_qcd'][cat].GetBinContent(xbin, ybin)
+        frac_w = fractions['frac_w'][cat].GetBinContent(xbin, ybin)
+
+        weights['fake_weight'][i] = fake_weights.get_ff(df['t1_pt'].iloc[i], df['mt'].iloc[i], df['vis_mass'].iloc[i], df[pt_name].iloc[i], df['lep_dr'].iloc[i],
+                                         df['met'].iloc[i], df['njets'].iloc[i], df['cross_trigger'].iloc[i],
+                                         frac_tt, frac_qcd, frac_w)
+
+        if doSyst:
+            for syst in systs:
+                weights[syst[0] + "_" + syst[1]][i] = fake_weights.get_ff(df['t1_pt'].iloc[i], df['mt'].iloc[i], df['vis_mass'].iloc[i], df[pt_name].iloc[i],
+                                                                               df['lep_dr'].iloc[i], df['met'].iloc[i], df['njets'].iloc[i], df['cross_trigger'].iloc[i],
+                                                                               frac_tt, frac_qcd, frac_w, syst[0], syst[1])
+
+    return weights
+
+
 def parse_tree_name(keys):
     """Take list of keys in the file and search for our TTree"""
     if 'et_tree;1' in keys:
@@ -103,25 +150,20 @@ def parse_tree_name(keys):
 
 
 def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions, sample, doSysts=False):
-    ff_weighter = FFApplicationTool(fake_file, channel_prefix, isDifferential=True) if channel_prefix == 'mt' else FFApplicationTool(fake_file, channel_prefix, isDifferential=False)
+    ff_weighter = FFApplicationTool(fake_file, channel_prefix, isDifferential=True) if channel_prefix == 'mt' else FFApplicationTool(
+        fake_file, channel_prefix, isDifferential=False)
 
     open_file = uproot.open('{}/{}.root'.format(input_name, sample))
     events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
     anti_events = events[(events['is_antiTauIso'] > 0)].copy()
 
-    anti_events['fake_weight'] = anti_events[filling_variables].apply(
-        lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
-    if sample != 'data_obs':
-        anti_events['fake_weight'] *= -1
+    weights = get_weights(anti_events[filling_variables], ff_weighter, fractions, channel_prefix, doSysts)
+    for name, weight in weights.iteritems():
+        if sample != 'data_obs':
+            weight = -1 * weight
+        anti_events[name] = weight
 
-    if doSysts:
-        for syst in systs:
-            print 'Processing: {} {}'.format(sample, syst)
-            anti_events[syst[0] + "_" + syst[1]] = anti_events[filling_variables].apply(lambda x: get_weight(
-                x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
-            if sample != 'data_obs':
-                anti_events[syst[0] + "_" + syst[1]] *= -1
-
+    print 'Finished weighting {}'.format(sample)
     with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample)) as f:
         f[tree_name] = uproot.newtree(treedict)
         f[tree_name].extend(anti_events.to_dict('list'))

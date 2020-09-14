@@ -31,6 +31,8 @@ def getNames(sample):
         names = ['ggH125']
     elif 'vbf125' in sample.lower():
         names = ['VBF125']
+    elif 'HWminusJtoWW' in sample or 'HWplusJtoWW' in sample:
+        names = ['WH_signed_hww125']
     elif 'wplus' in sample.lower() or 'wminus' in sample.lower():
         names = ['WHsigned125']
     elif 'wh125' in sample.lower():
@@ -41,6 +43,14 @@ def getNames(sample):
         names = ['ttH125']
     elif 'embed' in sample:
         names = ['embed']
+    elif 'ggHtoWW' in sample:
+        names = ['ggH_hww125']
+    elif 'VBFtoWW' in sample:
+        names = ['qqH_hww125']
+    elif 'HZJtoWW' in sample:
+        names = ['HZJtoWW']
+    elif 'ggZHtoWW' in sample:
+        names = ['ZH_hww125']
     else:
         names = ['VVJ', 'VVT', 'VVL']
 
@@ -59,7 +69,7 @@ def getNames(sample):
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
-    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
+    invalid_samples = ['EWKZ', 'EWKW', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
     for sample in invalid_samples:
         if sample in ifile:
             return False
@@ -300,7 +310,7 @@ def main(args):
         job_map = {}
         for ifile in fileList:
             sample = ifile.split('/')[-1].split(suffix)[0]
-            tosample = ifile.replace(sample+suffix, '')
+            tosample = ifile.replace(sample+suffix, '').replace('/hdfs', 'root://cmsxrootd.hep.wisc.edu:1094/')
             names, signal_type = getNames(sample)
             file_map = defaultdict(list)
             for name in names:
@@ -342,7 +352,7 @@ def main(args):
         processes = []
         for ifile in fileList:
             sample = ifile.split('/')[-1].split(suffix)[0]
-            tosample = ifile.replace(sample+suffix, '')
+            tosample = ifile.replace(sample+suffix, '').replace('/hdfs', 'root://cmsxrootd.hep.wisc.edu:1094/')
 
             names, signal_type = getNames(sample)
             # if signal_type != "minlo": continue

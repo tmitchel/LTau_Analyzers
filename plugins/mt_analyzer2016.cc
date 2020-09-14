@@ -146,27 +146,28 @@ int main(int argc, char *argv[]) {
 
     // read inputs for lumi reweighting
     auto lumi_weights =
-        new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/MC_Moriond17_PU25ns_V1.root",
-                                      "/hdfs/store/user/tmitchel/HTT_ScaleFactors/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
+        new reweight::LumiReWeighting("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/MC_Moriond17_PU25ns_V1.root",
+                                      "root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
     // legacy sf's
-    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2016.root");
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
-    htt_sf_file.Close();
+    TFile* htt_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2016.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file->Get("w"));
+    htt_sf_file->Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2016_MGggh.root");
-        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
-        mg_sf_file.Close();
+        TFile* mg_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2016_MGggh.root");
+        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file->Get("w"));
+        mg_sf_file->Close();
     }
 
     // top pT tune correction
-    TFile top_tune_corr_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/toppt_correction_to_2016.root");
-    TF1 *top_tune_corr = reinterpret_cast<TF1 *>(top_tune_corr_file.Get("toppt_ratio_to_2016"));
+    TFile* top_tune_corr_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/toppt_correction_to_2016.root");
+    TF1 *top_tune_corr = reinterpret_cast<TF1 *>(top_tune_corr_file->Get("toppt_ratio_to_2016"));
+    top_tune_corr_file->Close();
 
-    TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
+    TFile *f_NNLOPS = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
@@ -175,6 +176,7 @@ int main(int argc, char *argv[]) {
     TGraph *g_mcatnlo_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_1jet"));
     TGraph *g_mcatnlo_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_2jet"));
     TGraph *g_mcatnlo_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_3jet"));
+    f_NNLOPS->Close();
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -318,7 +320,7 @@ int main(int argc, char *argv[]) {
             evtwt *= event.getPrefiringWeight();
 
             // b-tagging scale factor goes here
-            evtwt *= jets.getBWeight();
+            // evtwt *= jets.getBWeight();
 
             // set workspace variables
             htt_sf->var("m_pt")->setVal(muon.getPt());

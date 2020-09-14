@@ -142,23 +142,23 @@ int main(int argc, char *argv[]) {
     ///////////////////////////////////////////////
 
     auto lumi_weights =
-        new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root",
-                                      "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
+        new reweight::LumiReWeighting("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root",
+                                      "root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
 
     // legacy sf's
-    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
-    htt_sf_file.Close();
+    TFile* htt_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file->Get("w"));
+    htt_sf_file->Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
-        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
-        mg_sf_file.Close();
+        TFile* mg_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
+        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file->Get("w"));
+        mg_sf_file->Close();
     }
 
-    TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
+    TFile *f_NNLOPS = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
             evtwt *= event.getGenWeight();
 
             // b-tagging scale factor goes here
-            evtwt *= jets.getBWeight();
+            // evtwt *= jets.getBWeight();
 
             // set workspace variables
             htt_sf->var("m_pt")->setVal(muon.getPt());
