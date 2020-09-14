@@ -9,6 +9,7 @@ import datetime
 from glob import glob
 from array import array
 from pprint import pprint
+from tqdm import tqdm
 
 
 def build_filelist(input_dir):
@@ -65,10 +66,12 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     Returns:
     hists -- filled histograms
     """
+    data = data.dropna(subset=['MELA_D2j'])
     evtwt = data['evtwt'].to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
+    dcp_name = None
     if xvar_name == 'D0_ggH':
         dcp = data['DCP_ggH'].values
     elif xvar_name == 'D0_VBF':
@@ -81,20 +84,16 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     if fake_weight != None:
         evtwt *= data[fake_weight].values
 
+    if zvar_name != None:
+        vbf_cat = pandas.cut(data[zvar_name], bins=edges, labels=range(len(edges) - 1), include_lowest=True, right=True).values
+    
     for i in xrange(len(data.index)):
         if zvar_name != None:
             hists[-1].Fill(xvar[i], yvar[i], evtwt[i])
-            for j, edge in enumerate(edges[1:]):  # remove lowest left edge
-                if zvar[i] < edge:
-                    if DCP_idx == None:
-                        hists[j].Fill(xvar[i], yvar[i], evtwt[i])
-                    else:
-                        if dcp[i] > 0:
-                            hists[j].Fill(xvar[i], yvar[i], evtwt[i])
-                        else:
-                            # DCP minus bins are offset by DCP_idx
-                            hists[j+DCP_idx].Fill(xvar[i], yvar[i], evtwt[i])
-                    break
+            idx = vbf_cat[i]
+            if DCP_idx != None and dcp[i] < 0:
+                idx += DCP_idx
+            hists[int(idx)].Fill(xvar[i], yvar[i], evtwt[i])
         else:
             hists.Fill(xvar[i], yvar[i], evtwt[i])
 
@@ -176,13 +175,12 @@ def main(args):
 
     logging.basicConfig(filename='logs/2D_htt_{}_{}_{}_fa3_{}_{}{}.log'.format(channel_prefix,
                                                                                ztt_name, syst_name, args.year, date, args.suffix))
-    nsysts = len(filelist.keys())
-    idx = -1
-    for syst, files in filelist.iteritems():
+    
+    pbar = tqdm(filelist.items())
+    for syst, files in pbar:
+        pbar.set_description('Processing: {}'.format(syst))
         if not args.syst and syst != 'nominal':
             continue
-        idx += 1
-        print 'Processing syst {} ({} of {})'.format(syst, idx, nsysts)
         postfix = get_syst_name(channel_prefix, syst, syst_name_map)
         if postfix == 'unknown':  # skip unknown systematics
             continue
@@ -192,7 +190,7 @@ def main(args):
         postfix = postfix.replace('CHAN', 'et') if channel_prefix == 'et' else postfix.replace('CHAN', 'mt')
         stable_postfix = postfix
 
-        for ifile in files:
+        for ifile in tqdm(files, leave=False):
             # handle ZTT vs embedded
             if args.embed and 'ZTT' in ifile:
                 continue
