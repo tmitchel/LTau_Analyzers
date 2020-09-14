@@ -108,7 +108,7 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst)
     input->SetBranchAddress("nbtag", &nbtag);
     input->SetBranchAddress(("bjetDeepCSVVeto20Loose_" + btag_string + "_DR0p5").c_str(), &nbtag_loose);
     input->SetBranchAddress(("bjetDeepCSVVeto20Medium_" + btag_string + "_DR0p5").c_str(), &nbtag_medium);
-    input->SetBranchAddress(bweight_string.c_str(), &bweight);
+    // input->SetBranchAddress(bweight_string.c_str(), &bweight);
     input->SetBranchAddress("j1pt", &jpt_1);
     input->SetBranchAddress("j1eta", &jeta_1);
     input->SetBranchAddress("j1phi", &jphi_1);

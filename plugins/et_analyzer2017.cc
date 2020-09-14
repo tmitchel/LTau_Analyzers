@@ -30,6 +30,7 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
+#include "../include/bjet_weighter.h"
 
 typedef std::vector<double> NumV;
 
@@ -182,6 +183,9 @@ int main(int argc, char *argv[]) {
     TGraph *g_mcatnlo_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_2jet"));
     TGraph *g_mcatnlo_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_mcatnlo_3jet"));
 
+    // bveto weights
+    bjet_weighter bveto_weights(2017, bveto_wp::medium);
+
     //////////////////////////////////////
     // Final setup:                     //
     // Declare histograms and factories //
@@ -291,7 +295,7 @@ int main(int argc, char *argv[]) {
         }
 
         // b-jet veto
-        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
+        if (jets.getNbtagMedium() < 1) {
             histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
@@ -325,7 +329,8 @@ int main(int argc, char *argv[]) {
             evtwt *= event.getPrefiringWeight();
 
             // b-tagging scale factor goes here
-            // evtwt *= jets.getBWeight();
+            auto bjets = jets.getBtagJets();
+            evtwt *= bveto_weights.find_weight(bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor());
 
             // Z-Vtx HLT Correction
             evtwt *= 0.991;
