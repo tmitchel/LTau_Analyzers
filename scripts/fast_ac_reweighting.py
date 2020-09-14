@@ -74,12 +74,12 @@ def main(args):
     # make sure everything in the pool is finished
     q.put(len(jobs))
     all_jobs = [job.get() for job in jobs]
-    print 'Waiting for processes to finish...'
+    q.put('kill')
     pool.close()
     pool.join()
 
     # move output files
-    out_dirs = [idir for idir in glob('{}/'.format(temp_name))]
+    out_dirs = [idir for idir in glob('{}/*'.format(temp_name))]
     pbar = tqdm(out_dirs)
     for idir in pbar:
         pbar.set_description('Moving: {}'.format(idir.split('/')[-1]))
