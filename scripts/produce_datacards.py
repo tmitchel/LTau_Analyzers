@@ -162,7 +162,7 @@ def main(args):
     vbf_categories = []
     n_edges = len(vbf_cat_edges) - 1
     DCP_idx = 0
-    if 'D0_' in vbf_cat_edge_var:
+    if 'D0_' in vbf_cat_x_var:
         vbf_categories += boilerplate['vbf_sub_cats_plus'][:n_edges] + boilerplate['vbf_sub_cats_minus'][:n_edges]
         DCP_idx  = n_edges
     else:

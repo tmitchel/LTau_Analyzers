@@ -78,7 +78,7 @@ muon_factory::muon_factory(TTree* input, int era, std::string _syst) : syst(_sys
     input->SetBranchAddress("q_1", &q_1);
     input->SetBranchAddress("mRelPFIsoDBDefault", &iso_1);
     input->SetBranchAddress("gen_match_1", &gen_match_1);
-    input->SetBranchAddress("mPFIDMedium", &mediumID);
+    // input->SetBranchAddress("mPFIDMedium", &mediumID);
     input->SetBranchAddress("mGenPt", &mGenPt);
     input->SetBranchAddress("mGenEta", &mGenEta);
     input->SetBranchAddress("mGenPhi", &mGenPhi);
