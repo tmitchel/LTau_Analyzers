@@ -22,6 +22,7 @@
 #include "../include/CLParser.h"
 #include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
+#include "../include/bjet_weighter.h"
 #include "../include/event_info.h"
 #include "../include/jet_factory.h"
 #include "../include/met_factory.h"
@@ -29,7 +30,6 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "../include/bjet_weighter.h"
 
 typedef std::vector<double> NumV;
 
@@ -142,19 +142,19 @@ int main(int argc, char *argv[]) {
     // Read weights, hists, graphs, etc. for SFs //
     ///////////////////////////////////////////////
 
-    auto lumi_weights =
-        new reweight::LumiReWeighting("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root",
-                                      "root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
+    auto lumi_weights = new reweight::LumiReWeighting(
+        "root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root",
+        "root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
 
     // legacy sf's
-    TFile* htt_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
+    TFile *htt_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file->Get("w"));
     htt_sf_file->Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile* mg_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
+        TFile *mg_sf_file = TFile::Open("root://cmsxrootd.hep.wisc.edu:1094//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
         mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file->Get("w"));
         mg_sf_file->Close();
     }
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
         }
 
         // b-jet veto
-        if (jets.getNbtagMedium() < 1) {
+        if ((!isData && !isEmbed) || jets.getNbtagMedium() < 1) {
             histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
@@ -311,7 +311,8 @@ int main(int argc, char *argv[]) {
 
             // b-tagging scale factor goes here
             auto bjets = jets.getBtagJets();
-            evtwt *= bveto_weights.find_weight(bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor());
+            evtwt *= bveto_weights.find_weight(bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(0).getBScore(), bjets.at(1).getPt(),
+                                               bjets.at(1).getFlavor(), bjets.at(1).getBScore());
 
             // set workspace variables
             htt_sf->var("m_pt")->setVal(muon.getPt());

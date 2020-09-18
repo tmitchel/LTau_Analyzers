@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
         }
 
         // b-jet veto
-        if (jets.getNbtagMedium() < 1) {
+        if ((!isData && !isEmbed) || jets.getNbtagMedium() < 1) {
             histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
@@ -313,7 +313,8 @@ int main(int argc, char *argv[]) {
 
             // b-tagging scale factor goes here
             auto bjets = jets.getBtagJets();
-            evtwt *= bveto_weights.find_weight(bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor());
+            evtwt *= bveto_weights.find_weight(bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(0).getBScore(), bjets.at(1).getPt(),
+                                               bjets.at(1).getFlavor(), bjets.at(1).getBScore());
 
             // Z-Vtx HLT Correction
             evtwt *= 0.991;

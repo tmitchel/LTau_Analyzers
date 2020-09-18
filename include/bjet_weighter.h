@@ -27,6 +27,9 @@ enum bveto_wp { loose, medium };
 class bjet_weighter {
    private:
     int year, working_point;
+    double current_wp;
+    double loose_wp_2016, loose_wp_2018;
+    double medium_wp_2016, medium_wp_2018;
     double get_sf(double, double, std::string);
     double get_loose_sf_2016(double, double, std::string);
     double get_loose_sf_2018(double, double, std::string);
@@ -37,20 +40,37 @@ class bjet_weighter {
     bjet_weighter(int _year, int _wp);
     ~bjet_weighter() {}
 
-    double find_weight(double, double, double, double, std::string);
+    double find_weight(double, double, double, double, double, double, std::string);
 };
 
-bjet_weighter::bjet_weighter(int _year, int _wp) : year(_year), working_point(_wp) {
+bjet_weighter::bjet_weighter(int _year, int _wp)
+    : year(_year), working_point(_wp), loose_wp_2016(0.2217), loose_wp_2018(0.1241), medium_wp_2016(0.6321), medium_wp_2018(0.4184) {
     if (working_point != bveto_wp::loose && working_point != bveto_wp::medium) {
         throw "working point must be bveto_wp::loose or bveto_wp::medium";
     }
+
+    if (year == 2016) {
+        if (working_point == bveto_wp::loose) {
+            current_wp = loose_wp_2016;
+        } else {
+            current_wp = medium_wp_2016;
+        }
+    } else {
+        if (working_point == bveto_wp::loose) {
+            current_wp = loose_wp_2018;
+        } else {
+            current_wp = medium_wp_2018;
+        }
+    }
 }
 
-double bjet_weighter::find_weight(double pt1, double flv1, double pt2, double flv2, std::string syst = "none") {
-    if (pt2 > -1) {
+double bjet_weighter::find_weight(double pt1, double flv1, double bs1, double pt2, double flv2, double bs2, std::string syst = "none") {
+    if (pt1 > 0 && bs1 > current_wp && pt2 > 0 && bs2 > current_wp) {
         return (1 - get_sf(pt1, flv1, syst)) * (1 - get_sf(pt2, flv2, syst));  // (1-SF1)*(1 - SF2)
-    } else if (pt1 > -1) {
+    } else if (pt1 > 0 && bs1 > current_wp) {
         return 1 - get_sf(pt1, flv1, syst);  // 1 - SF
+    } else if (pt2 > 0 && bs2 > current_wp) {
+        return 1 - get_sf(pt2, flv2, syst);  // 1 - SF
     }
     return 1.;
 }

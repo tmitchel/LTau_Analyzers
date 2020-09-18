@@ -6,13 +6,14 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+
 #include "TLorentzVector.h"
 #include "TRandom3.h"
 #include "TTree.h"
 
 class jet {
    private:
-    Float_t pt, eta, phi, csv, flavor;
+    Float_t pt, eta, phi, bscore, flavor;
     TLorentzVector p4;
 
    public:
@@ -22,13 +23,14 @@ class jet {
     Float_t getPt() { return pt; }
     Float_t getEta() { return eta; }
     Float_t getPhi() { return phi; }
-    Float_t getCSV() { return csv; }
+    Float_t getBScore() { return bscore; }
     Float_t getFlavor() { return flavor; }
     TLorentzVector getP4() { return p4; }
 };
 
 // initialize member data and set TLorentzVector
-jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor = -9999) : pt(Pt), eta(Eta), phi(Phi), csv(Csv), flavor(Flavor) {
+jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t _bscore, Float_t Flavor = -9999)
+    : pt(Pt), eta(Eta), phi(Phi), bscore(_bscore), flavor(Flavor) {
     p4.SetPtEtaPhiM(Pt, Eta, Phi, 0.);
 }
 
@@ -37,8 +39,8 @@ class jet_factory {
     Float_t mjj;
     Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
     Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
-    Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
-    Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
+    Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1, bscore_1;
+    Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2, bscore_2;
     Float_t topQuarkPt1, topQuarkPt2, temp_njets;
     Float_t Nbtag, njetspt20, njets, nbtag_loose, nbtag_medium;
     Int_t nbtag;
@@ -120,12 +122,12 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst)
     input->SetBranchAddress("jb1pt", &bpt_1);
     input->SetBranchAddress("jb1eta", &beta_1);
     input->SetBranchAddress("jb1phi", &bphi_1);
-    // input->SetBranchAddress(("jb1csv_" + btag_string).c_str(), &bcsv_1);
+    input->SetBranchAddress("deepcsvb1_btagscore", &bscore_1);
     input->SetBranchAddress("jb1hadronflavor", &bflavor_1);
     input->SetBranchAddress("jb2pt", &bpt_2);
     input->SetBranchAddress("jb2eta", &beta_2);
     input->SetBranchAddress("jb2phi", &bphi_2);
-    // input->SetBranchAddress(("jb2csv_" + btag_string).c_str(), &bcsv_2);
+    input->SetBranchAddress("deepcsvb2_btagscore", &bscore_1);
     input->SetBranchAddress("jb2hadronflavor", &bflavor_2);
     input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
     input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
@@ -140,8 +142,8 @@ void jet_factory::run_factory() {
 
     jet j1(jpt_1, jeta_1, jphi_1, jcsv_1);
     jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);
-    jet b1(bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1);
-    jet b2(bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2);
+    jet b1(bpt_1, beta_1, bphi_1, bscore_1, bflavor_1);
+    jet b2(bpt_2, beta_2, bphi_2, bscore_2, bflavor_2);
     plain_jets.push_back(j1);
     plain_jets.push_back(j2);
     btag_jets.push_back(b1);
