@@ -187,9 +187,9 @@ def getSyst(name, signal_type, exe, doSyst):
         systs += ['EEScale_Up', 'EEScale_Down']
     elif '_mt' in exe:
         systs += [
-            'MES_gt2p1_Up', 'MES_gt2p1_Down',
-            'MES_1p2to2p1_Up', 'MES_1p2to2p1_Down',
-            'MES_lt1p2_Up', 'MES_lt1p2_Down',
+            'MES_gt2p1_gt2p1_Up', 'MES_gt2p1_gt2p1_Down',
+            'MES_1p2to2p1_1p2to2p1_Up', 'MES_1p2to2p1_1p2to2p1_Down',
+            'MES_lt1p2_lt1p2_Up', 'MES_lt1p2_lt1p2_Down',
         ]
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
