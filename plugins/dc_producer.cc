@@ -11,6 +11,7 @@
 #include <regex>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "../include/CLParser.h"
@@ -21,14 +22,39 @@
 #include "TTree.h"
 
 using std::string;
+using std::unordered_map;
 using std::vector;
 
+class file_processor {
+   private:
+    std::shared_ptr<TFile> fout;
+    bool is_jetFakes;
+    Int_t isolation, contamination;
+    Double_t fake_weight, NN_disc;
+    Float_t evtwt, njets, mjj, t1_pt, m_sv, higgs_pt;
+    vector<string> vbf_cats;
+    vector<double> tau_pt_bins, m_sv_bins_0jet, higgs_pT_bins_boost, m_sv_bins_boost, vbf_cat_x_bins, vbf_cat_y_bins;
+    unordered_map<string, Float_t> vbf_vars;
+    unordered_map<string, Double_t> other_vars;
+    unordered_map<string, vector<TH2F *> *> all_histograms;
+
+   public:
+    string xvar_name, yvar_name, zvar_name, dcp_name, channel;
+    vector<double> edges;
+
+    file_processor(std::shared_ptr<TFile>, string, nlohmann::json, vector<string>);
+    void register_branches(TTree *, bool);
+    void register_new_branch(TTree *, string);
+    void create_histograms(string);
+    void process_file(TTree *, string, int);
+    void process_file_with_weights(TTree *, string, int, vector<std::pair<string, string>>, bool);
+    void write(vector<string>);
+};
+
 void read_directory(const string &, vector<string> *, string match = "");
-std::unordered_map<string, vector<string>> build_file_paths(string);
+unordered_map<string, vector<string>> build_file_paths(string);
 string format_output_name(string, bool, bool, string, int, int, string);
 TH2F *build_histogram(string, vector<double>, vector<double>);
-void process_file(string name, string channel, vector<TH2F *> histograms, string xvar_name, string yvar_name, string zvar_name, vector<double> edges,
-                  string fake_weight_name, int DCP_idx);
 
 int main(int argc, char *argv[]) {
     auto watch = TStopwatch();
@@ -80,17 +106,12 @@ int main(int argc, char *argv[]) {
     nlohmann::json binning_json;
     binning_file >> binning_json;
 
-    // binnings
-    auto tau_pt_bins = binning_json.at(config_name).at("tau_pt_bins");
-    auto m_sv_bins_0jet = binning_json.at(config_name).at("m_sv_bins_0jet");
-    auto higgs_pT_bins_boost = binning_json.at(config_name).at("higgs_pT_bins_boost");
-    auto m_sv_bins_boost = binning_json.at(config_name).at("m_sv_bins_boost");
     auto vbf_cat_x_bins = binning_json.at(config_name).at("vbf_cat_x_bins");
     auto vbf_cat_y_bins = binning_json.at(config_name).at("vbf_cat_y_bins");
     auto vbf_cat_edges = binning_json.at(config_name).at("vbf_cat_edges");
 
     // boilerplate
-    std::unordered_map<string, string> syst_name_map;
+    unordered_map<string, string> syst_name_map;
     bp_json.at("syst_name_map").get_to(syst_name_map);
 
     vector<string> output_file_directories, vbf_directories;
@@ -130,6 +151,8 @@ int main(int argc, char *argv[]) {
     }
     fout->cd();
 
+    auto p = new file_processor(fout, channel, binning_json.at(config_name), vbf_directories);
+
     vector<TH2F *> histograms;
     for (auto &fp : file_paths) {
         // only process nominal unless user requested all systematics
@@ -151,15 +174,28 @@ int main(int argc, char *argv[]) {
         orig_syst_name = std::regex_replace(orig_syst_name, std::regex("CHAN"), channel);
 
         std::cout << fp.first << " -> " << orig_syst_name << std::endl;
+
+        bool is_jetFakes(false), is_embed(false);
         for (auto &file : fp.second) {
-            if (is_ztt && file.find("embed") != string::npos) {
+            if (file == "embed.root") {
+                is_jetFakes = false;
+                is_embed = true;
+            } else if (file == "jetFakes.root") {
+                is_jetFakes = true;
+                is_embed = false;
+            } else {
+                is_jetFakes = false;
+                is_embed = false;
+            }
+
+            if (is_ztt && is_embed) {
                 continue;
             } else if (!is_ztt && file.find("ZTT") != string::npos) {
                 continue;
             }
 
             std::string syst_name = orig_syst_name;
-            if (file.find("embed") != string::npos) {
+            if (is_embed) {
                 if (syst_name.find("CMS_tauideff") != string::npos) {
                     syst_name = std::regex_replace(syst_name, std::regex("tauideff"), "eff_t_embedded");
                 } else if (syst_name.find("CMS_scale_e_") != string::npos) {
@@ -175,32 +211,20 @@ int main(int argc, char *argv[]) {
             string name = std::regex_replace(file, std::regex(".root"), "") + syst_name;
             std::cout << name << std::endl;
 
-            fout->cd((channel + "_0jet").c_str());
-            histograms.push_back(build_histogram(name, tau_pt_bins, m_sv_bins_0jet));
+            p->create_histograms(name);
 
-            fout->cd((channel + "_boosted").c_str());
-            histograms.push_back(build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost));
+            auto fin = TFile::Open((dir + "/" + fp.first + "/" + file).c_str());
+            auto tree = reinterpret_cast<TTree *>(fin->Get((channel + "_tree").c_str()));
+            p->register_branches(tree, is_jetFakes);
+            p->process_file(tree, name, DCP_idx);
+            fin->Close();
 
-            fout->cd((channel + "_vbf").c_str());
-            histograms.push_back(build_histogram(name, vbf_cat_x_bins.at(1), vbf_cat_y_bins.at(1)));
-
-            for (auto &d : vbf_directories) {
-                fout->cd((channel + "_" + d).c_str());
-                histograms.push_back(build_histogram(name, vbf_cat_x_bins.at(1), vbf_cat_y_bins.at(1)));
-            }
-
-            // provide nominal fake weight for jetFakes
-            auto fake_weight_name = name.find("jetFakes") != string::npos ? "fake_weight" : "None";
-            process_file(dir + "/" + fp.first + "/" + file, channel, histograms, vbf_cat_x_bins.at(0), vbf_cat_y_bins.at(0), vbf_cat_edges.at(0),
-                         vbf_cat_edges.at(1), fake_weight_name, DCP_idx);
-
-            for (unsigned j = 0; j < histograms.size(); j++) {
-                fout->cd((channel + "_" + all_output_directories.at(j)).c_str());
-                histograms.at(j)->Write();
-            }
-            histograms.clear();
-
-            if (fake_weight_name != "None" && do_syst) {
+            // handle jet systematics
+            if (is_jetFakes && do_syst) {
+                auto fin = TFile::Open((dir + "/" + fp.first + "/" + file).c_str());
+                auto tree = reinterpret_cast<TTree *>(fin->Get((channel + "_tree").c_str()));
+                p->register_branches(tree, is_jetFakes);
+                vector<std::pair<string, string>> weights;
                 for (auto &s : fake_factor_systematics) {
                     // make sure we know how to map this systematic
                     std::string syst_name("");
@@ -215,61 +239,80 @@ int main(int argc, char *argv[]) {
                     syst_name = std::regex_replace(syst_name, std::regex("LEP"), (channel == "et" ? "ele" : "mu"));
                     syst_name = std::regex_replace(syst_name, std::regex("CHAN"), channel);
 
-                    std::cout << "jetFakes " << syst_name << std::endl;
-
-                    histograms.clear();
-                    fout->cd((channel + "_0jet").c_str());
-                    histograms.push_back(build_histogram("jetFakes_" + s, tau_pt_bins, m_sv_bins_0jet));
-
-                    fout->cd((channel + "_boosted").c_str());
-                    histograms.push_back(build_histogram("jetFakes_" + s, higgs_pT_bins_boost, m_sv_bins_boost));
-
-                    fout->cd((channel + "_vbf").c_str());
-                    histograms.push_back(build_histogram("jetFakes_" + s, vbf_cat_x_bins.at(1), vbf_cat_y_bins.at(1)));
-
-                    for (auto &d : vbf_directories) {
-                        fout->cd((channel + "_" + d).c_str());
-                        histograms.push_back(build_histogram("jetFakes_" + s, vbf_cat_x_bins.at(1), vbf_cat_y_bins.at(1)));
-                    }
-                    process_file(dir + "/" + fp.first + "/" + file, channel, histograms, vbf_cat_x_bins.at(0), vbf_cat_y_bins.at(0),
-                                 vbf_cat_edges.at(0), vbf_cat_edges.at(1), s, DCP_idx);
-
-                    for (unsigned j = 0; j < histograms.size(); j++) {
-                        fout->cd((channel + "_" + all_output_directories.at(j)).c_str());
-                        histograms.at(j)->Write();
-                    }
-                    histograms.clear();
+                    p->create_histograms("jetFakes" + syst_name);
+                    p->register_new_branch(tree, s);
+                    weights.push_back(std::make_pair(s, "jetFakes" + syst_name));
                 }
+                p->process_file_with_weights(tree, name, DCP_idx, weights, true);
+                fin->Close();
             }
         }
     }
+
+    p->write(all_output_directories);
     fout->Close();
     std::cout << "Processing time: " << watch.RealTime() << std::endl;
 }
 
-void process_file(string name, string channel, vector<TH2F *> histograms, string xvar_name, string yvar_name, string zvar_name, vector<double> edges,
-                  string fake_weight_name, int DCP_idx) {
-    auto ifile = TFile::Open(name.c_str());
-    auto tree = reinterpret_cast<TTree *>(ifile->Get((channel + "_tree").c_str()));
-    Int_t isolation, contamination;
-    Double_t fake_weight, NN_disc;
-    Float_t evtwt, njets, mjj, t1_pt, m_sv, higgs_pt;
+file_processor::file_processor(std::shared_ptr<TFile> _fout, string _channel, nlohmann::json json, vector<string> _vbf_cats)
+    : fout(_fout), is_jetFakes(false), dcp_name("None"), vbf_cats(_vbf_cats), channel(_channel) {
+    auto in_tau_pt_bins = json.at("tau_pt_bins");
+    auto in_m_sv_bins_0jet = json.at("m_sv_bins_0jet");
+    auto in_higgs_pT_bins_boost = json.at("higgs_pT_bins_boost");
+    auto in_m_sv_bins_boost = json.at("m_sv_bins_boost");
+    auto in_vbf_cat_x_bins = json.at("vbf_cat_x_bins");
+    auto in_vbf_cat_y_bins = json.at("vbf_cat_y_bins");
+    auto in_vbf_cat_edges = json.at("vbf_cat_edges");
 
-    std::unordered_map<string, Float_t> vbf_vars = {{"NN_disc", 0},  {"MELA_D2j", 0},   {"D0_ggH", 0},  {"D_a2_VBF", 0}, {"D0_VBF", 0},
-                                                    {"D_l1_VBF", 0}, {"D_l1zg_VBF", 0}, {"DCP_ggH", 0}, {"DCP_VBF", 0}};
+    xvar_name = in_vbf_cat_x_bins.at(0);
+    yvar_name = in_vbf_cat_y_bins.at(0);
+    zvar_name = in_vbf_cat_edges.at(0);
+    in_tau_pt_bins.get_to<std::vector<double>>(tau_pt_bins);
+    in_m_sv_bins_0jet.get_to<std::vector<double>>(m_sv_bins_0jet);
+    in_higgs_pT_bins_boost.get_to<std::vector<double>>(higgs_pT_bins_boost);
+    in_m_sv_bins_boost.get_to<std::vector<double>>(m_sv_bins_boost);
+    in_vbf_cat_x_bins.at(1).get_to<std::vector<double>>(vbf_cat_x_bins);
+    in_vbf_cat_y_bins.at(1).get_to<std::vector<double>>(vbf_cat_y_bins);
+    in_vbf_cat_edges.at(1).get_to<std::vector<double>>(edges);
 
-    bool is_jetFakes(false);
-    string isolation_name("is_signal");
-    if (name.find("jetFakes") != string::npos) {
-        if (fake_weight_name == "None") {
-            std::cerr << "\t \033[91m[INFO] can't process jetFakes without providing: fake_weight_name \033[0m" << std::endl;
-        }
-        is_jetFakes = true;
-        isolation_name = "is_antiTauIso";
+    if (xvar_name == "D0_ggH") {
+        dcp_name = "DCP_ggH";
+    } else if (xvar_name == "D0_VBF") {
+        dcp_name = "DCP_VBF";
     }
 
+    vbf_vars = {{"NN_disc", 0},  {"MELA_D2j", 0},   {"D0_ggH", 0},  {"D_a2_VBF", 0}, {"D0_VBF", 0},
+                {"D_l1_VBF", 0}, {"D_l1zg_VBF", 0}, {"DCP_ggH", 0}, {"DCP_VBF", 0}};
+}
+
+void file_processor::create_histograms(string name) {
+    auto histograms = new vector<TH2F *>();
+    fout->cd((channel + "_0jet").c_str());
+    histograms->push_back(build_histogram(name, tau_pt_bins, m_sv_bins_0jet));
+
+    fout->cd((channel + "_boosted").c_str());
+    histograms->push_back(build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost));
+
+    fout->cd((channel + "_vbf").c_str());
+    histograms->push_back(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins));
+
+    for (auto &d : vbf_cats) {
+        fout->cd((channel + "_" + d).c_str());
+        histograms->push_back(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins));
+    }
+
+    all_histograms.insert(std::make_pair(name, histograms));
+}
+
+void file_processor::register_branches(TTree *tree, bool _is_jetFakes = false) {
+    is_jetFakes = _is_jetFakes;
+    if (is_jetFakes) {
+        tree->SetBranchAddress("is_antiTauIso", &isolation);
+        tree->SetBranchAddress("fake_weight", &fake_weight);
+    } else {
+        tree->SetBranchAddress("is_signal", &isolation);
+    }
     tree->SetBranchAddress("evtwt", &evtwt);
-    tree->SetBranchAddress(isolation_name.c_str(), &isolation);
     tree->SetBranchAddress("contamination", &contamination);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("mjj", &mjj);
@@ -285,18 +328,14 @@ void process_file(string name, string channel, vector<TH2F *> histograms, string
     tree->SetBranchAddress("D_l1zg_VBF", &vbf_vars.at("D_l1zg_VBF"));
     tree->SetBranchAddress("DCP_ggH", &vbf_vars.at("DCP_ggH"));
     tree->SetBranchAddress("DCP_VBF", &vbf_vars.at("DCP_VBF"));
+}
 
-    if (fake_weight_name != "None") {
-        tree->SetBranchAddress(fake_weight_name.c_str(), &fake_weight);
-    }
+void file_processor::register_new_branch(TTree *tree, string vname) {
+    other_vars[vname] = 0;
+    tree->SetBranchAddress(vname.c_str(), &other_vars.at(vname));
+}
 
-    std::string dcp_name("None");
-    if (xvar_name == "D0_ggH") {
-        dcp_name = "DCP_ggH";
-    } else if (xvar_name == "D0_VBF") {
-        dcp_name = "DCP_VBF";
-    }
-
+void file_processor::process_file(TTree *tree, string name, int DCP_idx) {
     double final_evtwt(1.);
     Long64_t nentries = tree->GetEntries();
     for (Long64_t i = 0; i < nentries; i++) {
@@ -309,26 +348,75 @@ void process_file(string name, string channel, vector<TH2F *> histograms, string
         final_evtwt = is_jetFakes ? evtwt * fake_weight : evtwt;
 
         if (njets == 0) {
-            histograms.at(0)->Fill(t1_pt, m_sv, final_evtwt);
+            all_histograms.at(name)->at(0)->Fill(t1_pt, m_sv, final_evtwt);
         } else if (njets == 1 || (njets > 1 && mjj < 300)) {
-            histograms.at(1)->Fill(higgs_pt, m_sv, final_evtwt);
+            all_histograms.at(name)->at(1)->Fill(higgs_pt, m_sv, final_evtwt);
         } else if (njets > 1 && mjj > 300) {
-            histograms.at(2)->Fill(vbf_vars.at(xvar_name), vbf_vars.at(yvar_name), final_evtwt);
-            if (edges.size() > 0) {
+            all_histograms.at(name)->at(2)->Fill(vbf_vars.at(xvar_name), vbf_vars.at(yvar_name), final_evtwt);
+            for (auto j = 0; j < edges.size() - 1; j++) {
+                if (vbf_vars.at(zvar_name) < edges.at(j + 1)) {
+                    auto curr_idx = 3 + j;
+                    if (DCP_idx > 0 && vbf_vars.at(dcp_name) < 0) {
+                        curr_idx += DCP_idx;
+                    }
+                    all_histograms.at(name)->at(curr_idx)->Fill(vbf_vars.at(xvar_name), vbf_vars.at(yvar_name), final_evtwt);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void file_processor::process_file_with_weights(TTree *tree, string name, int DCP_idx, vector<std::pair<string, string>> weights,
+                                               bool include_evtwt = false) {
+    double final_evtwt(1.);
+    Long64_t nentries = tree->GetEntries();
+    for (Long64_t i = 0; i < nentries; i++) {
+        tree->GetEntry(i);
+        if (isolation < 1 || contamination > 0) {
+            continue;
+        }
+
+        vbf_vars["NN_disc"] = NN_disc;
+
+        // jetFake systematics include evtwt, others don't
+        final_evtwt = include_evtwt ? evtwt : 1.;
+
+        if (njets == 0) {
+            for (auto &w : weights) {
+                all_histograms.at(w.second)->at(0)->Fill(t1_pt, m_sv, final_evtwt * other_vars.at(w.first));
+            }
+        } else if (njets == 1 || (njets > 1 && mjj < 300)) {
+            for (auto &w : weights) {
+                all_histograms.at(w.second)->at(1)->Fill(higgs_pt, m_sv, final_evtwt * other_vars.at(w.first));
+            }
+        } else if (njets > 1 && mjj > 300) {
+            for (auto &w : weights) {
+                all_histograms.at(w.second)->at(2)->Fill(vbf_vars.at(xvar_name), vbf_vars.at(yvar_name), final_evtwt * other_vars.at(w.first));
                 for (auto j = 0; j < edges.size() - 1; j++) {
                     if (vbf_vars.at(zvar_name) < edges.at(j + 1)) {
                         auto curr_idx = 3 + j;
                         if (DCP_idx > 0 && vbf_vars.at(dcp_name) < 0) {
                             curr_idx += DCP_idx;
                         }
-                        histograms.at(curr_idx)->Fill(vbf_vars.at(xvar_name), vbf_vars.at(yvar_name), final_evtwt);
+                        all_histograms.at(w.second)->at(curr_idx)->Fill(vbf_vars.at(xvar_name), vbf_vars.at(yvar_name),
+                                                                        final_evtwt * other_vars.at(w.first));
                         break;
                     }
                 }
             }
         }
     }
-    ifile->Close();
+}
+
+void file_processor::write(vector<string> all_output_directories) {
+    fout->cd();
+    for (auto &name : all_histograms) {
+        for (unsigned i = 0; i < name.second->size(); i++) {
+            fout->cd((channel + "_" + all_output_directories.at(i)).c_str());
+            name.second->at(i)->Write();
+        }
+    }
 }
 
 TH2F *build_histogram(string name, vector<double> x_bins, vector<double> y_bins) {
@@ -345,13 +433,13 @@ string format_output_name(string channel, bool is_ztt, bool is_syst, string year
            std::to_string(day) + suffix + ".root";
 }
 
-std::unordered_map<string, vector<string>> build_file_paths(string dir) {
+unordered_map<string, vector<string>> build_file_paths(string dir) {
     // read all files from input directory
     vector<string> directories;
     read_directory(dir, &directories);
 
     vector<string> files;
-    std::unordered_map<string, vector<string>> file_paths;
+    unordered_map<string, vector<string>> file_paths;
     for (string d : directories) {
         if (d == "." || d == "..") {
             continue;
