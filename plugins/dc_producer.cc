@@ -44,7 +44,7 @@ class file_processor {
 
     file_processor(std::shared_ptr<TFile>, string, nlohmann::json, vector<string>);
     void register_branches(TTree *, bool);
-    void register_new_branch(TTree *, string);
+    bool register_new_branch(TTree *, string);
     void create_histograms(string);
     void process_file(TTree *, string, int);
     void process_file_with_weights(TTree *, string, int, vector<std::pair<string, string>>, bool);
@@ -239,9 +239,11 @@ int main(int argc, char *argv[]) {
                     syst_name = std::regex_replace(syst_name, std::regex("LEP"), (channel == "et" ? "ele" : "mu"));
                     syst_name = std::regex_replace(syst_name, std::regex("CHAN"), channel);
 
-                    p->create_histograms("jetFakes" + syst_name);
-                    p->register_new_branch(tree, s);
-                    weights.push_back(std::make_pair(s, "jetFakes" + syst_name));
+                    auto exists = p->register_new_branch(tree, s);
+                    if (exists) {
+                        p->create_histograms("jetFakes" + syst_name);
+                        weights.push_back(std::make_pair(s, "jetFakes" + syst_name));
+                    }
                 }
                 p->process_file_with_weights(tree, name, DCP_idx, weights, true);
                 fin->Close();
@@ -331,8 +333,13 @@ void file_processor::register_branches(TTree *tree, bool _is_jetFakes = false) {
 }
 
 void file_processor::register_new_branch(TTree *tree, string vname) {
+    if (tree->GetBranch(vname.c_str()) == nullptr) {
+        return false
+    }
+
     other_vars[vname] = 0;
     tree->SetBranchAddress(vname.c_str(), &other_vars.at(vname));
+    return true
 }
 
 void file_processor::process_file(TTree *tree, string name, int DCP_idx) {
@@ -345,7 +352,9 @@ void file_processor::process_file(TTree *tree, string name, int DCP_idx) {
         }
 
         vbf_vars["NN_disc"] = NN_disc;
-        final_evtwt = is_jetFakes ? evtwt * fake_weight : evtwt;
+
+        // jetFake systematics include evtwt, others don't
+        final_evtwt = include_evtwt ? evtwt : 1.;
 
         if (njets == 0) {
             all_histograms.at(name)->at(0)->Fill(t1_pt, m_sv, final_evtwt);
