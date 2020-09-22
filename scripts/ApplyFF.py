@@ -162,7 +162,6 @@ class FFApplicationTool():
     
         #Raw ff
         if(njets==0):
-            ff_qcd=self.get_raw_FF(pt,self.ff_qcd_0jet)
             if unc == 'ff_qcd_0jet_unc1':
                 if upOrDown == 'up':
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_0jet_unc1_up)
@@ -173,7 +172,9 @@ class FFApplicationTool():
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_0jet_unc2_up)
                 elif upOrDown == 'down':
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_0jet_unc2_down)
-            ff_w=self.get_raw_FF(pt,self.ff_w_0jet)
+            else:
+                ff_qcd=self.get_raw_FF(pt,self.ff_qcd_0jet)
+
             if unc == 'ff_w_0jet_unc1':
                 if upOrDown == 'up':
                     ff_w=self.get_raw_FF(pt,self.ff_w_0jet_unc1_up)
@@ -184,9 +185,10 @@ class FFApplicationTool():
                     ff_w=self.get_raw_FF(pt,self.ff_w_0jet_unc2_up)
                 elif upOrDown == 'down':
                     ff_w = self.get_raw_FF(pt,self.ff_w_0jet_unc2_down)                    
+            else:
+                ff_w=self.get_raw_FF(pt,self.ff_w_0jet)
         elif(njets==1):
             #print("raw njets 1 function called")
-            ff_qcd=self.get_raw_FF(pt,self.ff_qcd_1jet)
             if unc == 'ff_qcd_1jet_unc1':
                 if upOrDown == 'up':
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_1jet_unc1_up)
@@ -197,7 +199,9 @@ class FFApplicationTool():
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_1jet_unc2_up)
                 elif upOrDown == 'down':
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_1jet_unc2_down)
-            ff_w=self.get_raw_FF(pt,self.ff_w_1jet)
+            else:
+                ff_qcd=self.get_raw_FF(pt,self.ff_qcd_1jet)
+
             if unc == 'ff_w_1jet_unc1':
                 if upOrDown == 'up':
                     ff_w=self.get_raw_FF(pt,self.ff_w_1jet_unc1_up)
@@ -208,8 +212,9 @@ class FFApplicationTool():
                     ff_w=self.get_raw_FF(pt,self.ff_w_1jet_unc2_up)
                 elif upOrDown == 'down':
                     ff_w = self.get_raw_FF(pt,self.ff_w_1jet_unc2_down)
+            else:
+                ff_w=self.get_raw_FF(pt,self.ff_w_1jet)
         else:
-            ff_qcd=self.get_raw_FF(pt,self.ff_qcd_2jet)
             if unc == 'ff_qcd_2jet_unc1':
                 if upOrDown == 'up':
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_2jet_unc1_up)
@@ -220,7 +225,8 @@ class FFApplicationTool():
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_2jet_unc2_up)
                 elif upOrDown == 'down':
                     ff_qcd = self.get_raw_FF(pt,self.ff_qcd_2jet_unc2_down)
-            ff_w=self.get_raw_FF(pt,self.ff_w_2jet)
+            else:
+                ff_qcd=self.get_raw_FF(pt,self.ff_qcd_2jet)
             if unc == 'ff_w_2jet_unc1':
                 if upOrDown == 'up':
                     ff_w=self.get_raw_FF(pt,self.ff_w_2jet_unc1_up)
@@ -231,8 +237,9 @@ class FFApplicationTool():
                     ff_w=self.get_raw_FF(pt,self.ff_w_2jet_unc2_up)
                 elif upOrDown == 'down':
                     ff_w = self.get_raw_FF(pt,self.ff_w_2jet_unc2_down)
+            else:
+                ff_w=self.get_raw_FF(pt,self.ff_w_2jet)
 
-        ff_tt=self.get_raw_FF(pt,self.ff_tt_0jet)
         if unc == 'ff_tt_0jet_unc1':
             if upOrDown == 'up':
                 ff_tt=self.get_raw_FF(pt,self.ff_tt_0jet_unc1_up)
@@ -243,6 +250,8 @@ class FFApplicationTool():
                 ff_tt=self.get_raw_FF(pt,self.ff_tt_0jet_unc2_up)
             elif upOrDown == 'down':
                 ff_tt=self.get_raw_FF(pt,self.ff_tt_0jet_unc2_down)
+        else:
+            ff_tt=self.get_raw_FF(pt,self.ff_tt_0jet)
 
         #MET closure
         """
