@@ -127,7 +127,7 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst)
     input->SetBranchAddress("jb2pt", &bpt_2);
     input->SetBranchAddress("jb2eta", &beta_2);
     input->SetBranchAddress("jb2phi", &bphi_2);
-    input->SetBranchAddress("deepcsvb2_btagscore", &bscore_1);
+    input->SetBranchAddress("deepcsvb2_btagscore", &bscore_2);
     input->SetBranchAddress("jb2hadronflavor", &bflavor_2);
     input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
     input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
