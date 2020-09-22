@@ -129,7 +129,8 @@ def main(args):
     bkg_hadd_list = clean(bkg_hadd_list)
     sig_hadd_list = clean(sig_hadd_list)
     sig_hadd_list = combine_wh(sig_hadd_list, args.path)
-    sig_hadd_list = split_madgraph(sig_hadd_list)
+    if not args.do_mg:
+        sig_hadd_list = split_madgraph(sig_hadd_list)
 
     # keep list of what is being hadded together
     with file('haddlog.txt', 'a') as outfile:
@@ -150,4 +151,5 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--path', '-p', required=True, help='path to files')
+    parser.add_argument('--do-mg', action='store_true', help='do madgraph reweighting')
     main(parser.parse_args())

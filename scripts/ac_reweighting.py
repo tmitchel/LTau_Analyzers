@@ -8,11 +8,13 @@ from tqdm import tqdm
 from subprocess import call
 
 
-def to_reweight(ifile):
+def to_reweight(ifile, do_mg):
     """List of signal samples. Only processes these files."""
-    for name in [
-        'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root'
-    ]:
+    valid = ['vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root']
+    if do_mg:
+        valid = valid + ['ggh125_madgraph.root']
+
+    for name in valid:
         if name in ifile:
             return True
     return False
@@ -54,11 +56,12 @@ def process_dir(ifile, idir, temp_name, input_path, boilerplate):
         weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
         weighted_signal_events.drop(drop_weights, axis=1, inplace=True)
 
-        output_name = '{}/{}.root'.format(temp_name, name) if '/hdfs' in input_path else '{}/merged/{}.root'.format(idir, name)
+        output_name = '{}/{}.root'.format(temp_name,
+                                          name) if '/hdfs' in input_path else '{}/merged/{}.root'.format(idir, name)
         with uproot.recreate(output_name) as f:
             f[tree_name] = uproot.newtree(treedict)
             f[tree_name].extend(weighted_signal_events.to_dict('list'))
-        
+
         if '/hdfs' in input_path:
             # print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
             call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
@@ -71,7 +74,7 @@ def process_dir(ifile, idir, temp_name, input_path, boilerplate):
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
-        idir: [ifile for ifile in glob('{}/merged/*.root'.format(idir)) if to_reweight(ifile)]
+        idir: [ifile for ifile in glob('{}/merged/*.root'.format(idir)) if to_reweight(ifile, args.do_mg)]
         for idir in input_directories
     }
     print 'Directory structure to process'
@@ -99,11 +102,11 @@ def main(args):
         [j.get() for j in jobs]
         pool.close()
         pool.join()
-        # print 'All files written for {}'.format(idir)
 
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', required=True, help='path to input files')
+    parser.add_argument('--do-mg', action='store_true', help='apply madgraph reweighting')
     main(parser.parse_args())

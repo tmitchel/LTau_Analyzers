@@ -66,7 +66,13 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
 
     string stype_dir = "";
     if (signal_type == "madgraph") {
-        notSignal = true;
+        if (year == "2016") {
+            stype_dir = "/MG2016_yurii/";
+        } else if (year == "2017") {
+            stype_dir = "/MG2017_yurii/";
+        } else if (year == "2018") {
+            stype_dir = "/MG2018_yurii/";
+        }
     } else if (signal_type == "JHU" && year == "2016") {
         stype_dir = "/JHU2016/";
     } else if (signal_type == "JHU" && year == "2017") {
