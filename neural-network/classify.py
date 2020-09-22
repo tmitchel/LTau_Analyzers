@@ -13,6 +13,7 @@ from array import array
 from pprint import pprint
 import multiprocessing
 import subprocess
+from tqdm import tqdm
 
 
 def build_filelist(input_dir):
@@ -150,7 +151,7 @@ def main(args):
 
     #     n_processes = min(12, multiprocessing.cpu_count() / 2)
     #     pool = multiprocessing.Pool(processes=n_processes)
-    #     jobs = [pool.apply_async(classify, (ifile, tree_prefix, scaler, scaler_columns, args.model,
+    #     jobs = [pool.apply_async(classify, (ifile, `tree_prefix, scaler, scaler_columns, args.model,
     #                                    '{}/{}'.format(args.output_dir, syst))) for ifile in ifiles]
 
     #     [j.get() for j in jobs]
