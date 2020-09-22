@@ -24,7 +24,7 @@ def call_cmd(ifile, idir, temp_name, input_path, boilerplate, queue):
     return None
 
 
-def listener(q):
+def listener(q, report):
     """Listen for messages on q then writes to file."""
     complete = []
     total = -1
@@ -112,7 +112,7 @@ def main(args):
     pool = multiprocessing.Pool(processes=n_processes)
     manager = multiprocessing.Manager()
     q = manager.Queue()
-    watcher = pool.apply_async(listener, (q))
+    watcher = pool.apply_async(listener, (q, 10))
 
     jobs = []
     pbar = tqdm(input_files.items())
