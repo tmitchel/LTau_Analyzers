@@ -18,6 +18,27 @@ def to_reweight(ifile):
     return False
 
 
+def call_cmd(ifile, idir, temp_name, input_path, boilerplate, queue):
+    process_dir(ifile, idir, temp_name, input_path, boilerplate)
+    queue.put(0)
+    return None
+
+
+def listener(q):
+    """Listen for messages on q then writes to file."""
+    complete = []
+    total = -1
+    while 1:
+        m = q.get()
+        if m == 'kill':
+            break
+        elif m > 1:
+            total = m
+            pbar = tqdm(total=total)
+        else:
+            pbar.update(1)
+
+
 def recognize_signal(ifile):
     """Pick the correct keys for this sample."""
     process = ifile.split('/')[-1].split('125')[0]
@@ -54,11 +75,12 @@ def process_dir(ifile, idir, temp_name, input_path, boilerplate):
         weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
         weighted_signal_events.drop(drop_weights, axis=1, inplace=True)
 
-        output_name = '{}/{}.root'.format(temp_name, name) if '/hdfs' in input_path else '{}/merged/{}.root'.format(idir, name)
+        output_name = '{}/{}.root'.format(temp_name,
+                                          name) if '/hdfs' in input_path else '{}/merged/{}.root'.format(idir, name)
         with uproot.recreate(output_name) as f:
             f[tree_name] = uproot.newtree(treedict)
             f[tree_name].extend(weighted_signal_events.to_dict('list'))
-        
+
         if '/hdfs' in input_path:
             # print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
             call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
@@ -86,20 +108,26 @@ def main(args):
         temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
         call('mkdir -p {}'.format(temp_name), shell=True)
 
+    n_processes = min(8, multiprocessing.cpu_count() / 2)
+    pool = multiprocessing.Pool(processes=n_processes)
+    manager = multiprocessing.Manager()
+    q = manager.Queue()
+    watcher = pool.apply_async(listener, (q))
+
+    jobs = []
     pbar = tqdm(input_files.items())
     for idir, files in pbar:
         pbar.set_description('Processing: {}'.format(idir.split('/')[-1]))
-        n_processes = min(12, multiprocessing.cpu_count() / 2)
-        pool = multiprocessing.Pool(processes=n_processes)
-        jobs = [
-            pool.apply_async(process_dir, (ifile, idir, temp_name, args.input, boilerplate))
+        jobs = jobs + [
+            pool.apply_async(call_cmd, (ifile, idir, temp_name, args.input, boilerplate))
             for ifile in files
         ]
 
-        [j.get() for j in jobs]
-        pool.close()
-        pool.join()
-        # print 'All files written for {}'.format(idir)
+    q.put(len(jobs))
+    all_jobs = [job.get() for job in jobs]
+    q.put('kill')
+    pool.close()
+    pool.join()
 
 
 if __name__ == "__main__":
