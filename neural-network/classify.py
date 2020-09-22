@@ -1,19 +1,19 @@
 from os import environ, path, mkdir, listdir, system
 environ['KERAS_BACKEND'] = 'tensorflow'
-from collections import defaultdict
-from sklearn.preprocessing import StandardScaler
-from keras.models import load_model
-import sys
-import ROOT
-import numpy
-import uproot
-import pandas as pd
-from glob import glob
-from array import array
-from pprint import pprint
-import multiprocessing
-import subprocess
 from tqdm import tqdm
+import subprocess
+import multiprocessing
+from pprint import pprint
+from array import array
+from glob import glob
+import pandas as pd
+import uproot
+import numpy
+import ROOT
+import sys
+from keras.models import load_model
+from sklearn.preprocessing import StandardScaler
+from collections import defaultdict
 
 
 def build_filelist(input_dir):
@@ -37,7 +37,7 @@ def build_filelist(input_dir):
     return data
 
 
-def listener(q):
+def listener(q, report):
     """Listen for messages on q then writes to file."""
     complete = []
     total = -1
@@ -56,6 +56,7 @@ def call_cmd(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir, qu
     classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir)
     queue.put(0)
     return None
+
 
 def classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir):
     fname = ifile.replace('.root', '').split('/')[-1]
@@ -96,6 +97,7 @@ def classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir):
 
     return None
 
+
 def main(args):
     # this will be removed soon
     if 'mutau' in args.input_dir or 'mt20' in args.input_dir:
@@ -126,14 +128,17 @@ def main(args):
     pool = multiprocessing.Pool(processes=n_processes)
     manager = multiprocessing.Manager()
     q = manager.Queue()
-    watcher = pool.apply_async(listener, (q))
+    watcher = pool.apply_async(listener, (q, 10))
 
     jobs = []
     pbar = tqdm(filelist.items())
     for syst, ifiles in pbar:
         pbar.set_description('Processing: {}'.format(syst))
+        out_path = 'Output/trees/{}/{}'.format(args.output_dir, syst)
+        if not path.exists(out_path):
+            mkdir(out_path)
         jobs = jobs + [pool.apply_async(call_cmd, (ifile, tree_prefix, scaler, scaler_columns, args.model,
-                                       '{}/{}'.format(args.output_dir, syst))) for ifile in ifiles]
+                                                   '{}/{}'.format(args.output_dir, syst), q)) for ifile in ifiles]
 
     q.put(len(jobs))
     all_jobs = [job.get() for job in jobs]
