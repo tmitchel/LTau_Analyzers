@@ -36,6 +36,26 @@ def build_filelist(input_dir):
     return data
 
 
+def listener(q):
+    """Listen for messages on q then writes to file."""
+    complete = []
+    total = -1
+    while 1:
+        m = q.get()
+        if m == 'kill':
+            break
+        elif m > 1:
+            total = m
+            pbar = tqdm(total=total)
+        else:
+            pbar.update(1)
+
+
+def call_cmd(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir, queue):
+    classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir)
+    queue.put(0)
+    return None
+
 def classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir):
     fname = ifile.replace('.root', '').split('/')[-1]
     # print 'Processing file: {} from {}'.format(fname, ifile.split('merged')[0].split('/')[-2])
@@ -100,28 +120,47 @@ def main(args):
     filelist = build_filelist(args.input_dir)
     print 'Files to process...'
     pprint(dict(filelist))
-    nsyst = len(filelist.keys())
-    i = 0
-    for syst, ifiles in filelist.iteritems():
-        # create output sub-directory (needed for systematics/nominal)
-        out_path = 'Output/trees/{}/{}'.format(args.output_dir, syst)
-        if not path.exists(out_path):
-            mkdir(out_path)
 
-        n_processes = min(12, multiprocessing.cpu_count() / 2)
-        pool = multiprocessing.Pool(processes=n_processes)
-        jobs = [pool.apply_async(classify, (ifile, tree_prefix, scaler, scaler_columns, args.model,
+    n_processes = min(8, multiprocessing.cpu_count() / 2)
+    pool = multiprocessing.Pool(processes=n_processes)
+    manager = multiprocessing.Manager()
+    q = manager.Queue()
+    watcher = pool.apply_async(listener, (q))
+
+    jobs = []
+    pbar = tqdm(filelist.items())
+    for syst, ifiles in pbar:
+        pbar.set_description('Processing: {}'.format(syst))
+        jobs = jobs + [pool.apply_async(call_cmd, (ifile, tree_prefix, scaler, scaler_columns, args.model,
                                        '{}/{}'.format(args.output_dir, syst))) for ifile in ifiles]
 
-        [j.get() for j in jobs]
-        pool.close()
-        pool.join()
-        i += 1
-        print 'All files written for {} ({} of {})'.format(syst, i, nsyst)
-        if args.move != None:
-            system('mkdir -p {}'.format(args.move))
-            subprocess.Popen(['nohup', 'mv', out_path, '{}/'.format(args.move)])
-            print 'Moved files from {} to {}'.format(out_path, args.move)
+    q.put(len(jobs))
+    all_jobs = [job.get() for job in jobs]
+    q.put('kill')
+    pool.close()
+    pool.join()
+
+    # nsyst = len(filelist.keys())
+    # i = 0
+    # for syst, ifiles in filelist.iteritems():
+    #     # create output sub-directory (needed for systematics/nominal)
+    #     out_path = 'Output/trees/{}/{}'.format(args.output_dir, syst)
+    #     if not path.exists(out_path):
+    #         mkdir(out_path)
+
+    #     n_processes = min(12, multiprocessing.cpu_count() / 2)
+    #     pool = multiprocessing.Pool(processes=n_processes)
+    #     jobs = [pool.apply_async(classify, (ifile, tree_prefix, scaler, scaler_columns, args.model,
+    #                                    '{}/{}'.format(args.output_dir, syst))) for ifile in ifiles]
+
+    #     [j.get() for j in jobs]
+    #     pool.close()
+    #     pool.join()
+    #     i += 1
+
+    if args.move != None:
+        system('mkdir -p {}'.format(args.move))
+        subprocess.call(['mv', 'Output/trees/{}'.format(args.output_dir), args.move], shell=True)
 
 
 if __name__ == "__main__":
