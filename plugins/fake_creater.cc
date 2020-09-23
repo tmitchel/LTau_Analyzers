@@ -30,10 +30,10 @@ class fake_map {
 fake_map::fake_map(TFile* ff_file) : categories({"0jet", "boosted", "vbf"}) {
     for (auto cat : categories) {
         fractions[cat] = std::vector<TH1F*>{
-            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/ff_w").c_str())),
-            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/ff_tt").c_str())),
-            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/ff_qcd").c_str())),
-            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/ff_data").c_str())),
+            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/frac_w").c_str())),
+            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/frac_tt").c_str())),
+            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/frac_qcd").c_str())),
+            reinterpret_cast<TH1F*>(ff_file->Get((cat + "/frac_data").c_str())),
         };
     }
 }
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     TTree* tree = reinterpret_cast<TTree*>(fin->Get((channel + "_tree").c_str()));
 
     // read fake fractions
-    TFile* ff_file = TFile::Open(fake_factor_path.c_str());
+    TFile* ff_file = TFile::Open(fake_fraction_path.c_str());
     auto fractions = fake_map(ff_file);
 
     // create output file

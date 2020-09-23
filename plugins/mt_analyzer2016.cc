@@ -293,11 +293,11 @@ int main(int argc, char *argv[]) {
 
         // b-jet veto
         auto bjets = jets.getBtagJets();
-        if ((isData || isEmbed) && jets.getNbtagMedium() < 1 && bjets.at(0).getBScore() < bveto_wp::medium) {
+        if (!isData && !isEmbed) {
             histos->at("cutflow")->Fill(6., 1.);
-        } else if (!isData && !isEmbed) {
+        } else if (jets.getNbtagMedium() < 1 && bjets.at(0).getBScore() < 0.6321) {
             histos->at("cutflow")->Fill(6., 1.);
-        } else {
+        }  else {
             continue;
         }
 
