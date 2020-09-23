@@ -12,7 +12,7 @@ njets_bins = [-0.5, 0.5, 1.5, 15]
 
 def get_categories(channel):
     """Return list of categories with the lepton prefix added."""
-    return [channel + pref for pref in ['_inclusive', '_0jet', '_boosted', '_vbf']]
+    return ['inclusive', '0jet', 'boosted', 'vbf']
 
 
 def build_histogram(name):
@@ -101,7 +101,10 @@ def main(args):
 
             # fill pre_jet_fakes with anti-isolated events
             if sample in inputs['frac_real']:
+                events['evtwt'] = -1 * events['evtwt']
                 pre_jet_fakes = pandas.concat([pre_jet_fakes, events])
+
+    pre_jet_fakes = pre_jet_fakes[(pre_jet_fakes['is_antiTauIso'] > 0)]
 
     for cat in categories:
         fractions['frac_qcd'][cat] = fractions['frac_data'][cat].Clone()
@@ -135,6 +138,8 @@ def main(args):
             fout.cd(cat_name)
             ihist.Write(frac_name)
 
+    fout.Close()
+
     # write the prefakes file to disk
     with uproot.recreate('{}/pre_jetFakes.root'.format(args.input)) as f:
         f[tree_name] = uproot.newtree(treedict)
@@ -145,7 +150,9 @@ def main(args):
         args.input, fake_fraction_output_name, fake_file_path, channel_prefix)
     if args.syst:
         callstring += ' -s '
+    print callstring
     call(callstring, shell=True)
+    print 'Finished in {} seconds'.format(time.time() - start)
 
 
 if __name__ == "__main__":

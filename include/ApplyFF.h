@@ -256,9 +256,9 @@ Float_t apply_ff::lpt_cls_corr_w(Float_t pt, Float_t lpt, Float_t xtrg, std::str
     // call sub-functions so that if mt/et synchronize at some point we can continue to just call
     // this function to handle things
     if (channel == "mt") {
-        return xtrg ? lpt_cls_corr_mt_w(pt, lpt, unc, dir) : lpt_cls_corr_xtrg_mt_w(pt, lpt, unc, dir);
+        return xtrg ? lpt_cls_corr_xtrg_mt_w(pt, lpt, unc, dir) : lpt_cls_corr_mt_w(pt, lpt, unc, dir);
     } else {
-        return xtrg ? lpt_cls_corr_et_w(pt, lpt, unc, dir) : lpt_cls_corr_xtrg_et_w(pt, lpt, unc, dir);
+        return xtrg ? lpt_cls_corr_xtrg_et_w(pt, lpt, unc, dir) : lpt_cls_corr_et_w(pt, lpt, unc, dir);
     }
 }
 
@@ -266,9 +266,9 @@ Float_t apply_ff::lpt_cls_corr_tt(Float_t pt, Float_t lpt, Float_t xtrg, std::st
     // call sub-functions so that if mt/et synchronize at some point we can continue to just call
     // this function to handle things
     if (channel == "mt") {
-        return xtrg ? lpt_cls_corr_mt_tt(pt, lpt, unc, dir) : lpt_cls_corr_xtrg_mt_tt(pt, lpt, unc, dir);
+        return xtrg ? lpt_cls_corr_xtrg_mt_tt(pt, lpt, unc, dir) : lpt_cls_corr_mt_tt(pt, lpt, unc, dir);
     } else {
-        return xtrg ? lpt_cls_corr_et_tt(pt, lpt, unc, dir) : lpt_cls_corr_xtrg_et_tt(pt, lpt, unc, dir);
+        return xtrg ? lpt_cls_corr_xtrg_et_tt(pt, lpt, unc, dir) : lpt_cls_corr_et_tt(pt, lpt, unc, dir);
     }
 }
 
@@ -276,9 +276,9 @@ Float_t apply_ff::lpt_cls_corr_qcd(Float_t pt, Float_t lpt, Float_t xtrg, std::s
     // call sub-functions so that if mt/et synchronize at some point we can continue to just call
     // this function to handle things
     if (channel == "mt") {
-        return xtrg ? lpt_cls_corr_mt_qcd(pt, lpt, unc, dir) : lpt_cls_corr_xtrg_mt_qcd(pt, lpt, unc, dir);
+        return xtrg ? lpt_cls_corr_xtrg_mt_qcd(pt, lpt, unc, dir) : lpt_cls_corr_mt_qcd(pt, lpt, unc, dir);
     } else {
-        return xtrg ? lpt_cls_corr_et_qcd(pt, lpt, unc, dir) : lpt_cls_corr_xtrg_et_qcd(pt, lpt, unc, dir);
+        return xtrg ? lpt_cls_corr_xtrg_et_qcd(pt, lpt, unc, dir) : lpt_cls_corr_et_qcd(pt, lpt, unc, dir);
     }
 }
 
@@ -568,14 +568,14 @@ Float_t apply_ff::get_ff(std::vector<Float_t> kin, std::string unc = "", std::st
     // kin = pt(0), mt(1), mvis(2), lpt(3), dr(4), met(5), njets(6), xtrg(7), frac_tt(8), frac_qcd(9), frac_w(10)
     Float_t eff_pt(std::min(static_cast<Float_t>(100), kin.at(0)));
     Float_t eff_mvis(std::min(static_cast<Float_t>(250), kin.at(2)));
-    Float_t eff_lpt(std::min(static_cast<Float_t>(150), kin.at(4)));
+    Float_t eff_lpt(std::min(static_cast<Float_t>(150), kin.at(3)));
     Float_t eff_met(std::max(static_cast<Float_t>(0), kin.at(5)));
 
     // get raw fake factors
     Float_t ff_qcd(1.), ff_w(1.), ff_tt(1.);
-    ff_qcd = raw_qcd(kin.at(0), kin.at(6), unc, dir);
-    ff_w = raw_w(kin.at(0), kin.at(6), unc, dir);
-    ff_tt = raw_tt(kin.at(0), unc, dir);
+    ff_qcd = raw_qcd(eff_pt, kin.at(6), unc, dir);
+    ff_w = raw_w(eff_pt, kin.at(6), unc, dir);
+    ff_tt = raw_tt(eff_pt, unc, dir);
 
     // lepton pT closure (depends on channel and cross trigger)
     ff_w *= lpt_cls_corr_w(eff_pt, eff_lpt, kin.at(7), unc, dir);
@@ -585,8 +585,8 @@ Float_t apply_ff::get_ff(std::vector<Float_t> kin, std::string unc = "", std::st
     // other closure corrections
     ff_w *= mt_closure_corr(kin.at(1), unc, dir);
     ff_qcd *= osss_closure_corr(kin.at(4), unc, dir);
-
-    return kin.at(8) * ff_tt * kin.at(9) * ff_qcd * kin.at(10) * ff_w;
+    
+    return kin.at(8) * ff_tt + kin.at(9) * ff_qcd + kin.at(10) * ff_w;
 }
 
 #endif  // INCLUDE_APPLYFF_H_
