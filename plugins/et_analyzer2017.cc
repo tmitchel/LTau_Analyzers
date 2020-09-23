@@ -295,8 +295,11 @@ int main(int argc, char *argv[]) {
         }
 
         // b-jet veto
-        if ((!isData && !isEmbed) || jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(7., 1.);
+        auto bjets = jets.getBtagJets();
+        if ((isData || isEmbed) && jets.getNbtagMedium() < 1 && bjets.at(0).getBScore() < bveto_wp::medium) {
+            histos->at("cutflow")->Fill(6., 1.);
+        } else if (!isData && !isEmbed) {
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -329,7 +332,6 @@ int main(int argc, char *argv[]) {
             evtwt *= event.getPrefiringWeight();
 
             // b-tagging scale factor goes here
-            auto bjets = jets.getBtagJets();
             evtwt *= bveto_weights.find_weight(bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(0).getBScore(), bjets.at(1).getPt(),
                                                bjets.at(1).getFlavor(), bjets.at(1).getBScore());
 

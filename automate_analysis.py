@@ -199,7 +199,7 @@ def getSyst(name, signal_type, exe, doSyst):
             'RecoilReso_njets2_Up', 'RecoilReso_njets2_Down', 'RecoilResp_njets2_Up', 'RecoilResp_njets2_Down',
             ]
 
-    if name == 'ggH125' and signal_type == 'powheg':
+    if name == 'ggH125' and (signal_type == 'powheg' or signal_type == 'madgraph'):
         systs += [
             'ggH_Rivet0_Up', 'ggH_Rivet0_Down', 'ggH_Rivet1_Up', 'ggH_Rivet1_Down', 'ggH_Rivet2_Up', 'ggH_Rivet2_Down',
             'ggH_Rivet3_Up', 'ggH_Rivet3_Down', 'ggH_Rivet4_Up', 'ggH_Rivet4_Down', 'ggH_Rivet5_Up', 'ggH_Rivet5_Down',
