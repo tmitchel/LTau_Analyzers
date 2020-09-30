@@ -104,11 +104,12 @@ def main(args):
     i = 0
     for syst, ifiles in filelist.iteritems():
         # create output sub-directory (needed for systematics/nominal)
+        print 'Starting {}'.format(syst)
         out_path = 'Output/trees/{}/{}'.format(args.output_dir, syst)
         if not path.exists(out_path):
             mkdir(out_path)
 
-        n_processes = min(12, multiprocessing.cpu_count() / 2)
+        n_processes = min(15, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
         jobs = [pool.apply_async(classify, (ifile, tree_prefix, scaler, scaler_columns, args.model,
                                        '{}/{}'.format(args.output_dir, syst))) for ifile in ifiles]
