@@ -3,6 +3,7 @@ import time
 import pandas
 import numpy
 import uproot
+import os
 from array import array
 from subprocess import call
 
@@ -141,17 +142,22 @@ def main(args):
     fout.Close()
 
     # write the prefakes file to disk
-    with uproot.recreate('{}/pre_jetFakes.root'.format(args.input)) as f:
+    tmp_path = 'tmp/{}/'.format(args.suffix)
+    tmp_file_path = tmp_path + 'pre_jetFakes.root'
+    call('mkdir -p {}'.format(tmp_path), shell=True)
+    with uproot.recreate(tmp_file_path) as f:
         f[tree_name] = uproot.newtree(treedict)
         f[tree_name].extend(pre_jet_fakes.to_dict('list'))
 
+
     # call C++ binary to fill weights
     callstring = './bin/create-fakes -i {} -p {} -f {} -c {}'.format(
-        args.input, fake_fraction_output_name, fake_file_path, channel_prefix)
+        tmp_path, fake_fraction_output_name, fake_file_path, channel_prefix)
     if args.syst:
         callstring += ' -s '
     print callstring
     call(callstring, shell=True)
+    os.system('mv -v {} {}'.format(tmp_file_path.replace('pre_jetFakes', 'jetFakes'), args.input),)
     print 'Finished in {} seconds'.format(time.time() - start)
 
 
