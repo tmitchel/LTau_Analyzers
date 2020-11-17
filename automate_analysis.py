@@ -123,6 +123,7 @@ def getSyst(name, signal_type, exe, doSyst):
                 'efaket_norm_pt30to40_Up', 'efaket_norm_pt30to40_Down',
                 'efaket_norm_pt40to50_Up', 'efaket_norm_pt40to50_Down',
                 'efaket_norm_ptgt50_Up', 'efaket_norm_ptgt50_Down',
+                'tau_id_vsmu_vloose_Up', 'tau_id_vsmu_vloose_Down'
             ]
         elif '_mt' in exe:
             # tau id vsMu systematics
@@ -132,6 +133,7 @@ def getSyst(name, signal_type, exe, doSyst):
                 'tau_id_mu_disc_eta_0p8to1p2_Up', 'tau_id_mu_disc_eta_0p8to1p2_Down',
                 'tau_id_mu_disc_eta_1p2to1p7_Up', 'tau_id_mu_disc_eta_1p2to1p7_Down',
                 'tau_id_mu_disc_eta_gt1p7_Up', 'tau_id_mu_disc_eta_gt1p7_Down',
+                'tau_id_vse_vvvloose_Up', 'tau_id_vse_vvvloose_Down'
             ]
             if name != 'embed':
                 # muon faking tau energy scale systematics
@@ -139,6 +141,7 @@ def getSyst(name, signal_type, exe, doSyst):
                     'mfaket_es_DM0_Up', 'mfaket_es_DM0_Down',
                     'mfaket_es_DM1_Up', 'mfaket_es_DM1_Down',
                 ]
+
 
     if name != 'embed':
         # jet energy scale, unclustered MET, and JER

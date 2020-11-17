@@ -521,6 +521,12 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+
+            if (syst == "tau_id_vsmu_vloose_Up") {
+                evtwt *= tau.getPt() <= 100 ? 1.05 : 1.15;
+            } else if (syst == "tau_id_vsmu_vloose_Down") {
+                evtwt *= tau.getPt() <= 100 ? 0.95 : 0.85;
+            }
         }
         fout->cd();
 
