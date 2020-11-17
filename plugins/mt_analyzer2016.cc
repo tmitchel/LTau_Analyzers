@@ -455,6 +455,12 @@ int main(int argc, char *argv[]) {
             if (sample == "vbf125" && signal_type == "powheg" && syst.find("VBF_Rivet") != std::string::npos) {
                 evtwt *= event.getVBFTheoryUnc(syst);
             }
+
+            if (syst == "tau_id_vse_vvvloose_Up") {
+                evtwt *= 1.03;
+            } else if (syst == "tau_id_vse_vvvloose_Down") {
+                evtwt *= 0.97;
+            }
         } else if (!isData && isEmbed) {
             event.setEmbed();
 

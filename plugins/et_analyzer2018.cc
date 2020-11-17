@@ -454,6 +454,12 @@ int main(int argc, char *argv[]) {
                 efake_pt_shift = (syst == "efaket_norm_pt30to40_Up" ? 1.1 : 0.9);
             }
             evtwt *= efake_pt_shift;
+
+            if (syst == "tau_id_vsmu_vloose_Up") {
+                evtwt *= 1.03;
+            } else if (syst == "tau_id_vsmu_vloose_Down") {
+                evtwt *= 0.97;
+            }
         } else if (!isData && isEmbed) {
             event.setEmbed();
             // embedded cross-triggers not applied in skimmer
