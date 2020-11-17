@@ -134,10 +134,10 @@
         "zh125_JHU_l1zgint": "JHU__unweighted_ZH_htt_0L1Zgf05ph0125"
     },
     "syst_name_map": {
-        "tau_id_vse_vvvloose_Up": "_CMS_tauideff_vse_vvvloose_Up",
-        "tau_id_vse_vvvloose_Down": "_CMS_tauideff_vse_vvvloose_Down",
-        "tau_id_vsmu_vloose_Up": "_CMS_tauideff_vsmu_vloose_Up",
-        "tau_id_vsmu_vloose_Down": "_CMS_tauideff_vsmu_vloose_Down",
+        "tau_id_vse_vvvloose_Up": "_CMS_tauideff_vse_vvvloose_YEARUp",
+        "tau_id_vse_vvvloose_Down": "_CMS_tauideff_vse_vvvloose_YEARDown",
+        "tau_id_vsmu_vloose_Up": "_CMS_tauideff_vsmu_vloose_YEARUp",
+        "tau_id_vsmu_vloose_Down": "_CMS_tauideff_vsmu_vloose_YEARDown",
 
         "prefiring_up": "_CMS_htt_prefiring_Up",
         "prefiring_down": "_CMS_htt_prefiring_Down",
