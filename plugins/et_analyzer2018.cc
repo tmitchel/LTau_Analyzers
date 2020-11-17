@@ -456,9 +456,9 @@ int main(int argc, char *argv[]) {
             evtwt *= efake_pt_shift;
 
             if (syst == "tau_id_vsmu_vloose_Up") {
-                evtwt *= 1.03;
+                evtwt *= tau.getPt() <= 100 ? 1.03 : 1.15;
             } else if (syst == "tau_id_vsmu_vloose_Down") {
-                evtwt *= 0.97;
+                evtwt *= tau.getPt() <= 100 ? 0.97 : 0.85;
             }
         } else if (!isData && isEmbed) {
             event.setEmbed();
