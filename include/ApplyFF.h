@@ -349,7 +349,7 @@ Float_t apply_ff::lpt_cls_corr_mt_tt(Float_t pt, Float_t lpt, std::string unc, s
 }
 
 Float_t apply_ff::lpt_cls_corr_xtrg_mt_qcd(Float_t pt, Float_t lpt, std::string unc, std::string dir) {
-    if (unc == "lptclosure_qcd") {
+    if (unc == "lptclosure_xtrg_qcd") {
         if (pt > 30. && pt <= 50.) {
             return lptClosure_QCD_xtrg_taupt30to50->Eval(lpt) * (dir == "up" ? 1.1 : 0.9);
         } else if (pt > 50. && pt <= 70.) {
@@ -371,7 +371,7 @@ Float_t apply_ff::lpt_cls_corr_xtrg_mt_qcd(Float_t pt, Float_t lpt, std::string 
 }
 
 Float_t apply_ff::lpt_cls_corr_xtrg_mt_w(Float_t pt, Float_t lpt, std::string unc, std::string dir) {
-    if (unc == "lptclosure_w") {
+    if (unc == "lptclosure_xtrg_w") {
         if (pt > 30. && pt <= 50.) {
             return lptClosure_W_xtrg_taupt30to50->Eval(lpt) * (dir == "up" ? 1.1 : 0.9);
         } else if (pt > 50. && pt <= 70.) {
@@ -393,7 +393,7 @@ Float_t apply_ff::lpt_cls_corr_xtrg_mt_w(Float_t pt, Float_t lpt, std::string un
 }
 
 Float_t apply_ff::lpt_cls_corr_xtrg_mt_tt(Float_t pt, Float_t lpt, std::string unc, std::string dir) {
-    if (unc == "lptclosure_tt") {
+    if (unc == "lptclosure_xtrg_tt") {
         if (pt > 30. && pt <= 50.) {
             return lptClosure_TT_xtrg_taupt30to50->Eval(lpt) * (dir == "up" ? 1.1 : 0.9);
         } else if (pt > 50. && pt <= 70.) {
@@ -481,7 +481,7 @@ Float_t apply_ff::lpt_cls_corr_et_tt(Float_t pt, Float_t lpt, std::string unc, s
 }
 
 Float_t apply_ff::lpt_cls_corr_xtrg_et_qcd(Float_t pt, Float_t lpt, std::string unc, std::string dir) {
-    if (unc == "lptclosure_qcd") {
+    if (unc == "lptclosure_xtrg_qcd") {
         if (pt > 30. && pt <= 40.) {
             return lptClosure_QCD_xtrg_taupt30to40->Eval(lpt) * (dir == "up" ? 1.1 : 0.9);
         } else if (pt > 40. && pt <= 50.) {
@@ -503,7 +503,7 @@ Float_t apply_ff::lpt_cls_corr_xtrg_et_qcd(Float_t pt, Float_t lpt, std::string 
 }
 
 Float_t apply_ff::lpt_cls_corr_xtrg_et_w(Float_t pt, Float_t lpt, std::string unc, std::string dir) {
-    if (unc == "lptclosure_w") {
+    if (unc == "lptclosure_xtrg_w") {
         if (pt > 30. && pt <= 40.) {
             return lptClosure_W_xtrg_taupt30to40->Eval(lpt) * (dir == "up" ? 1.1 : 0.9);
         } else if (pt > 40. && pt <= 50.) {
@@ -525,7 +525,7 @@ Float_t apply_ff::lpt_cls_corr_xtrg_et_w(Float_t pt, Float_t lpt, std::string un
 }
 
 Float_t apply_ff::lpt_cls_corr_xtrg_et_tt(Float_t pt, Float_t lpt, std::string unc, std::string dir) {
-    if (unc == "lptclosure_tt") {
+    if (unc == "lptclosure_xtrg_tt") {
         if (pt > 30. && pt <= 40.) {
             return lptClosure_TT_xtrg_taupt30to40->Eval(lpt) * (dir == "up" ? 1.1 : 0.9);
         } else if (pt > 40. && pt <= 50.) {
