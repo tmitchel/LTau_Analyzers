@@ -123,7 +123,6 @@ def getSyst(name, signal_type, exe, doSyst):
                 'efaket_norm_pt30to40_Up', 'efaket_norm_pt30to40_Down',
                 'efaket_norm_pt40to50_Up', 'efaket_norm_pt40to50_Down',
                 'efaket_norm_ptgt50_Up', 'efaket_norm_ptgt50_Down',
-                'tau_id_vsmu_vloose_Up', 'tau_id_vsmu_vloose_Down'
             ]
         elif '_mt' in exe:
             # tau id vsMu systematics
@@ -133,7 +132,6 @@ def getSyst(name, signal_type, exe, doSyst):
                 'tau_id_mu_disc_eta_0p8to1p2_Up', 'tau_id_mu_disc_eta_0p8to1p2_Down',
                 'tau_id_mu_disc_eta_1p2to1p7_Up', 'tau_id_mu_disc_eta_1p2to1p7_Down',
                 'tau_id_mu_disc_eta_gt1p7_Up', 'tau_id_mu_disc_eta_gt1p7_Down',
-                'tau_id_vse_vvvloose_Up', 'tau_id_vse_vvvloose_Down'
             ]
             if name != 'embed':
                 # muon faking tau energy scale systematics
@@ -185,14 +183,18 @@ def getSyst(name, signal_type, exe, doSyst):
     if name == 'ZL' or name == 'ZTT':
         systs += ['dyShape_Up', 'dyShape_Down']
 
-    # lepton energy scales
+    # lepton energy scales and tau ID VSx
     if '_et' in exe:
-        systs += ['EEScale_Up', 'EEScale_Down']
+        systs += [
+            'EEScale_Up', 'EEScale_Down',
+            'tau_id_vsmu_vloose_Up', 'tau_id_vsmu_vloose_Down'
+        ]
     elif '_mt' in exe:
         systs += [
             'MES_gt2p1_gt2p1_Up', 'MES_gt2p1_gt2p1_Down',
             'MES_1p2to2p1_1p2to2p1_Up', 'MES_1p2to2p1_1p2to2p1_Down',
             'MES_lt1p2_lt1p2_Up', 'MES_lt1p2_lt1p2_Down',
+            'tau_id_vse_vvvloose_Up', 'tau_id_vse_vvvloose_Down'
         ]
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
