@@ -486,8 +486,8 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
-            evtwt *= htt_sf->function("m_trk_ratio")->getVal();
-            evtwt *= htt_sf->function("m_idiso_ic_embed_ratio")->getVal();
+            // evtwt *= htt_sf->function("m_trk_ratio")->getVal();
+            evtwt *= htt_sf->function("m_idiso_ic_ratio_emb")->getVal();
 
             // tau ID efficiency SF and systematics
             std::string id_name = "t_deeptauid_pt_embed_medium";  // nominal
@@ -503,7 +503,8 @@ int main(int argc, char *argv[]) {
             }
 
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                evtwt *= htt_sf->function("t_id_vs_e_eta_vvloose")->getVal();
+                // evtwt *= htt_sf->function("t_id_vs_e_eta_vvloose")->getVal();
+                std::cout << "Electron" << std::endl;
             }
 
             // trigger scale factors
@@ -543,21 +544,22 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                evtwt *= htt_sf->function(mu_fake_id_name.c_str())->getVal();
+                // evtwt *= htt_sf->function(mu_fake_id_name.c_str())->getVal();
+              std::cout << "Muon" << std::endl;
             }
 
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_kit_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(muon.getGenPt());
             htt_sf->var("gt_eta")->setVal(muon.getGenEta());
-            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_idemb_kit_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
-            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_idemb_kit_ratio")->getVal();
 
             if (syst == "tau_id_vse_vvvloose_Up") {
                 evtwt *= tau.getPt() <= 100 ? 1.05 : 1.15;
