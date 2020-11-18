@@ -487,7 +487,7 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
             // evtwt *= htt_sf->function("m_trk_ratio")->getVal();
-            evtwt *= htt_sf->function("m_idiso_ic_ratio_emb")->getVal();
+            evtwt *= htt_sf->function("m_idiso_ratio_emb")->getVal();
 
             // tau ID efficiency SF and systematics
             std::string id_name = "t_deeptauid_pt_embed_medium";  // nominal

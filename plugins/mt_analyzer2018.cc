@@ -471,8 +471,8 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
             // start applying weights from workspace
-            evtwt *= htt_sf->function("m_trk_ratio")->getVal();
-            evtwt *= htt_sf->function("m_idiso_ic_embed_ratio")->getVal();
+            // evtwt *= htt_sf->function("m_trk_ratio")->getVal();
+            evtwt *= htt_sf->function("m_idiso_binned_kit_embed")->getVal();
 
             // tau ID efficiency SF and systematics
             std::string id_name = "t_deeptauid_pt_embed_medium";  // nominal
@@ -490,7 +490,7 @@ int main(int argc, char *argv[]) {
             // trigger scale factors
             if (muon.getPt() < 25) {  // cross-trigger
                 // muon-leg
-                evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
+                evtwt *= htt_sf->function("m_trg_MuTau_Mu20Leg_kit_ratio_embed")->getVal();
                 if (syst == "embed_cross_trigger_up") {
                     evtwt *= 1.02;  // 2% per light lepton leg
                 } else if (syst == "embed_cross_trigger_down") {
@@ -498,13 +498,13 @@ int main(int argc, char *argv[]) {
                 }
 
                 // tau-leg
-                std::string tau_leg_name("t_trg_mediumDeepTau_mutau_embed_ratio");
+                std::string tau_leg_name("mt_emb_LooseChargedIsoPFTau27_tight_kit_ratio");
                 if (syst.find("embed_cross_trigger") != std::string::npos) {
                     tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
                 evtwt *= htt_sf->function(tau_leg_name.c_str())->getVal();
             } else {  // muon trigger
-                evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
+                evtwt *= htt_sf->function("m_trg24_27_embed_kit_ratio")->getVal();
                 if (syst == "embed_single_trigger_up") {
                     evtwt *= 1.02;  // 2% per light lepton leg
                 } else if (syst == "embed_single_trigger_down") {
@@ -524,11 +524,13 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                evtwt *= htt_sf->function(mu_fake_id_name.c_str())->getVal();
+                // evtwt *= htt_sf->function(mu_fake_id_name.c_str())->getVal();
+              std::cout << "Muon" << std::endl;
             }
 
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                evtwt *= htt_sf->function("t_id_vs_e_eta_vvloose")->getVal();
+                // evtwt *= htt_sf->function("t_id_vs_e_eta_vvloose")->getVal();
+                std::cout << "Electron" << std::endl;
             }
 
             // double muon trigger eff in selection
@@ -537,12 +539,12 @@ int main(int argc, char *argv[]) {
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(muon.getGenPt());
             htt_sf->var("gt_eta")->setVal(muon.getGenEta());
-            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_idEmb_ratio")->getVal();
 
             // muon ID eff in selection (leg 2)
             htt_sf->var("gt_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
-            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_idEmb_ratio")->getVal();
 
             if (syst == "tau_id_vse_vvvloose_Up") {
                 evtwt *= tau.getPt() <= 100 ? 1.05 : 1.15;

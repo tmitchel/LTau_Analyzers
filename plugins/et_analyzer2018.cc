@@ -489,8 +489,8 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
-            evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
-            evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
+            // evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
+            evtwt *= htt_sf->function("e_idiso_binned_kit_embed")->getVal();
 
             // tau ID eff SF
             std::string id_name = "t_deeptauid_pt_tightvse_embed_medium";
@@ -516,19 +516,21 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+                // evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+              std::cout << "Electron" << std::endl;
             }
 
             if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-              evtwt *= htt_sf->function("t_id_vs_mu_eta_vloose")->getVal();
+              // evtwt *= htt_sf->function("t_id_vs_mu_eta_vloose")->getVal();
+              std::cout << "Muon" << std::endl;
             }
 
             // trigger scale factors
             bool fireSingle = electron.getPt() > 33;
             bool fireCross = electron.getPt() < 33;
-            std::string single_eff_name = "e_trg_ic_embed_ratio";
-            std::string el_leg_eff_name = "e_trg_24_ic_embed_ratio";
-            std::string tau_leg_eff_name =  "t_trg_mediumDeepTau_etau_embed_ratio";
+            std::string single_eff_name = "e_trg27_trg32_trg35_embed_kit_ratio";
+            std::string el_leg_eff_name = "e_trg_EleTau_Ele24Leg_kit_ratio_embed";
+            std::string tau_leg_eff_name =  "et_emb_LooseChargedIsoPFTau30_tight_kit_ratio";
             if (syst == "embed_cross_trigger_up") {
                 tau_leg_eff_name += "_up";
             } else if (syst == "embed_cross_trigger_down") {
@@ -558,12 +560,12 @@ int main(int argc, char *argv[]) {
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(electron.getGenPt());
             htt_sf->var("gt_eta")->setVal(electron.getGenEta());
-            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_idEmb_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
-            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_idEmb_ratio")->getVal();
 
             if (syst == "tau_id_vsmu_vloose_Up") {
                 evtwt *= tau.getPt() <= 100 ? 1.05 : 1.15;
