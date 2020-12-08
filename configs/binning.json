@@ -6,7 +6,7 @@
         "m_sv_bins_boost": [50, 70, 90, 110, 130, 150, 170, 210, 250, 290],
         "vbf_cat_x_bins": ["mjj", [300, 500, 10000]],
         "vbf_cat_y_bins": ["m_sv", [0, 80, 100, 115, 130, 150, 1000]],
-        "vbf_cat_edges": ["D0_VBF", [0, 10000.0]]
+        "vbf_cat_edges": ["m_sv", [0, 10000.0]]
     },
     "neural_ggh": {
         "tau_pt_bins": [30, 40, 50, 9000],

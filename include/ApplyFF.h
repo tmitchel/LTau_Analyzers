@@ -40,7 +40,7 @@ class apply_ff {
         *lptClosure_QCD_xtrg_tauptgt50, *lptClosure_TT_xtrg_taupt30to40, *lptClosure_TT_xtrg_taupt40to50, *lptClosure_TT_xtrg_tauptgt50;
 
     TF1 *OSSSClosure_QCD, *MTClosure_W, *MTClosure_W_unc1_up, *MTClosure_W_unc1_down, *MTClosure_W_unc2_up, *MTClosure_W_unc2_down,
-        *tauPtCorrection_qcd, *tauPtCorrection_w;
+        *tauPtCorrection_qcd, *tauPtCorrection_w, *metClosure_W_0jet;
 
     Float_t raw_qcd(Float_t, Float_t, std::string, std::string);
     Float_t raw_w(Float_t, Float_t, std::string, std::string);
@@ -188,6 +188,7 @@ apply_ff::apply_ff(std::string path, std::string _channel) : channel(_channel) {
 
     tauPtCorrection_qcd = reinterpret_cast<TF1 *>(tpt_file->Get("mt_0jet_qcd_taupt_iso"));
     tauPtCorrection_w = reinterpret_cast<TF1 *>(tpt_file->Get("mt_0jet_w_taupt_iso"));
+    metClosure_W_0jet = reinterpret_cast<TF1 *>(vis_mass_file->Get(("closure_met_" + channel + "_0jet_w").c_str()));
 }
 
 Float_t apply_ff::raw_w(Float_t pt, Float_t njets, std::string unc, std::string dir) {
@@ -585,6 +586,18 @@ Float_t apply_ff::get_ff(std::vector<Float_t> kin, std::string unc = "", std::st
     // other closure corrections
     ff_w *= mt_closure_corr(kin.at(1), unc, dir);
     ff_qcd *= osss_closure_corr(kin.at(4), unc, dir);
+
+    // test MET correction
+    if (kin.at(6) == 0) {
+        ff_w *= metClosure_W_0jet->Eval(eff_met);
+        // if (eff_met < 70) {
+        //     ff_w *= 1.05;
+        // } else if (eff_met >= 70 && eff_met < 100) {
+        //     ff_w *= 0.95;
+        // } else {
+        //     ff_w *= 0.85;
+        // }
+    }
     
     return kin.at(8) * ff_tt + kin.at(9) * ff_qcd + kin.at(10) * ff_w;
 }

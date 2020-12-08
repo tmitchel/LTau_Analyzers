@@ -293,11 +293,13 @@ int main(int argc, char *argv[]) {
         auto bjets = jets.getBtagJets();
         if (!isData && !isEmbed) {
             histos->at("cutflow")->Fill(6., 1.);
-        } else if (jets.getNbtagMedium() < 1 && bjets.at(0).getBScore() < 0.6321) {
+        } else if ((bjets.at(0).getPt() < 20 || bjets.at(0).getBScore() < 0.6321) && (bjets.at(1).getPt() < 20 || bjets.at(1).getBScore() < 0.2217)) {
             histos->at("cutflow")->Fill(6., 1.);
         }  else {
             continue;
         }
+
+        if (tau.getP4().DeltaR(electron.getP4()) < 2 || fabs(tau.getEta()) > 2.1) continue;
 
         // create regions
         bool signalRegion = (tau.getMediumIsoDeep() && electron.getIso() < 0.15);

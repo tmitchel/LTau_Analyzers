@@ -66,7 +66,8 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     Returns:
     hists -- filled histograms
     """
-    data = data.dropna(subset=['MELA_D2j'])
+    if 'MELA_D2j' in data.columns:
+      data = data.dropna(subset=['MELA_D2j'])
     evtwt = data['evtwt'].to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
@@ -76,7 +77,7 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
         dcp = data['DCP_ggH'].values
     elif xvar_name == 'D0_VBF':
         dcp = data['DCP_VBF'].values
-    elif xvar_name == 'D_a2_VBF' or xvar_name == 'D_l1_VBF' or xvar_name == 'D_l1zg_VBF':
+    elif xvar_name == 'D_a2_VBF' or xvar_name == 'D_l1_VBF' or xvar_name == 'D_l1zg_VBF' or xvar_name == 'mjj':
         DCP_idx = None  # DCP binning is only used when measuring fa3
     elif zvar_name != None:
         raise Exception('Don\'t know how to handle DCP for provided xvar_name {}'.format(xvar_name))
@@ -253,7 +254,7 @@ def main(args):
                 general_selection = general_selection[(general_selection['contamination'] == 0)]
 
             # do signal categorization
-            zero_jet_events = general_selection[general_selection['njets'] == 0]
+            zero_jet_events = general_selection[(general_selection['njets'] == 0)]
             boosted_events = general_selection[
                 (general_selection['njets'] == 1) |
                 ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300))

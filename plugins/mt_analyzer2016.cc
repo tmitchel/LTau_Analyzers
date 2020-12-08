@@ -256,6 +256,8 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
+        if (fabs(muon.getEta()) > 0.2 && fabs(muon.getEta()) < 0.3) continue;
+
         // Separate processes
         if ((name == "ZL" || name == "TTL" || name == "VVL" || name == "STL") && tau.getGenMatch() > 4) {
             continue;
@@ -266,6 +268,8 @@ int main(int argc, char *argv[]) {
         } else {
             histos->at("cutflow")->Fill(3., 1.);
         }
+
+        // if (tau.getP4().DeltaR(muon.getP4()) < 2) continue;
 
         // only opposite-sign
         int evt_charge = tau.getCharge() + muon.getCharge();
@@ -292,10 +296,19 @@ int main(int argc, char *argv[]) {
         }
 
         // b-jet veto
+        // auto bjets = jets.getBtagJets();
+        // if (!isData && !isEmbed) {
+        //     histos->at("cutflow")->Fill(6., 1.);
+        // } else if (jets.getNbtagMedium() < 1 && bjets.at(0).getBScore() < 0.6321) {
+        //     histos->at("cutflow")->Fill(6., 1.);
+        // }  else {
+        //     continue;
+        // }
+
         auto bjets = jets.getBtagJets();
         if (!isData && !isEmbed) {
             histos->at("cutflow")->Fill(6., 1.);
-        } else if (jets.getNbtagMedium() < 1 && bjets.at(0).getBScore() < 0.6321) {
+        } else if ((bjets.at(0).getPt() < 20 || bjets.at(0).getBScore() < 0.6321) && (bjets.at(1).getPt() < 20 || bjets.at(1).getBScore() < 0.2217)) {
             histos->at("cutflow")->Fill(6., 1.);
         }  else {
             continue;
