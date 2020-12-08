@@ -38,6 +38,7 @@ class slim_tree {
     Float_t cross_trigger;
     Float_t lep_dr;
     Float_t qcdRegion, wjetsRegion, ttbarRegion, isoRegion, antiRegion;  // fake factor correction regions
+    Float_t met_closure_qcd, met_closure_other;
 
     // Anomolous coupling branches
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2,
@@ -90,6 +91,8 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("metphi", &metphi, "metphi/F");
     otree->Branch("mjj", &mjj, "mjj/F");
     otree->Branch("mt", &mt, "mt/F");
+    otree->Branch("met_closure_qcd", &met_closure_qcd, "met_closure_qcd/F");
+    otree->Branch("met_closure_other", &met_closure_other, "met_closure_other/F");
 
     otree->Branch("numGenJets", &numGenJets, "numGenJets/F");
 
@@ -469,6 +472,9 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     }
     cross_trigger = evt->getPassCrossTrigger(el->getPt());
     lep_dr = el->getP4().DeltaR(t->getP4());
+    met_closure_qcd = fmet->getMet() * TMath::Cos(TMath::ACos(TMath::Cos(fmet->getMetPhi() - t->getPhi()))) / t->getPt();
+    TLorentzVector metprime = (fmet->getP4() + el->getP4());
+    met_closure_other = fmet->getMet() * TMath::Cos(TMath::ACos(TMath::Cos(metprime.Phi() - t->getPhi()))) / t->getPt();
 
     otree->Fill();
 }
@@ -508,6 +514,10 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     }
     cross_trigger = evt->getPassCrossTrigger(mu->getPt());
     lep_dr = mu->getP4().DeltaR(t->getP4());
+    met_closure_qcd = fmet->getMet() * TMath::Cos(TMath::ACos(TMath::Cos(fmet->getMetPhi() - t->getPhi()))) / t->getPt();
+    TLorentzVector metprime = (fmet->getP4() + mu->getP4());
+    met_closure_other = fmet->getMet() * TMath::Cos(TMath::ACos(TMath::Cos(metprime.Phi() - t->getPhi()))) / t->getPt();
+
 
     otree->Fill();
 }
