@@ -5,10 +5,13 @@ OBIN=./bin
 
 .PHONY: all test
 
-all: mt-2016 mt-2017 mt-2018 et-2016 et-2017 et-2018 ac-reweight create-fakes
+all: mt-2016 mt-2017 mt-2018 et-2016 et-2017 et-2018 ac-reweight create-fakes fake-mt-2016
 
 mt-2016: plugins/mt_analyzer2016.cc
 	g++ $(OPT) plugins/mt_analyzer2016.cc $(ROOT) $(CFLAGS) -o $(OBIN)/analyze2016_mt
+
+fake-mt-2016: plugins/mt_fakefactor2016.cc
+	g++ $(OPT) plugins/mt_fakefactor2016.cc $(ROOT) $(CFLAGS) -o $(OBIN)/fake2016_mt
 
 mt-2017: plugins/mt_analyzer2016.cc
 	g++ $(OPT) plugins/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/analyze2017_mt

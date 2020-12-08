@@ -37,6 +37,7 @@ class slim_tree {
         hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr, lt_dphi;
     Float_t cross_trigger;
     Float_t lep_dr;
+    Float_t qcdRegion, wjetsRegion, ttbarRegion, isoRegion, antiRegion;  // fake factor correction regions
 
     // Anomolous coupling branches
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2,
@@ -136,7 +137,11 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("OS", &OS, "OS/I");
     otree->Branch("is_signal", &is_signal, "is_signal/I");
     otree->Branch("is_antiLepIso", &is_antiLepIso, "is_antiLepIso/I");
-    otree->Branch("is_antiTauIso", &is_antiTauIso, "is_antiTauIso/I");
+    otree->Branch("qcdRegion", &qcdRegion, "qcdRegion/I");
+    otree->Branch("wjetsRegion", &wjetsRegion, "wjetsRegion/I");
+    otree->Branch("ttbarRegion", &ttbarRegion, "ttbarRegion/I");
+    otree->Branch("isoRegion", &isoRegion, "isoRegion/I");
+    otree->Branch("antiRegion", &antiRegion, "antiRegion/I");
     // otree->Branch("cat_0jet", &cat_0jet, "cat_0jet/I");
     // otree->Branch("cat_boosted", &cat_boosted, "cat_boosted/I");
     // otree->Branch("cat_vbf", &cat_vbf, "cat_vbf/I");
@@ -345,6 +350,11 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     is_antiTauIso = 0;
     is_qcd = 0;
     is_looseIso = 0;
+    qcdRegion = 0;
+    wjetsRegion = 0;
+    ttbarRegion = 0;
+    isoRegion = 0;
+    antiRegion = 0;
     cat_0jet = 0;
     cat_boosted = 0;
     cat_vbf = 0;
@@ -362,6 +372,18 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
             is_antiTauIso = 1;
         } else if (cat == "antiLepIso") {
             is_antiLepIso = 1;
+        } else if (cat == "qcdRegion") {
+            qcdRegion = 1;
+        } else if (cat == "wjetsRegion") {
+            wjetsRegion = 1;
+        } else if (cat == "ttbarRegion") {
+            ttbarRegion = 1;
+        }
+
+        if (cat == "isoRegion") {
+            isoRegion = 1;
+        } else if (cat == "antiRegion") {
+            antiRegion = 1;
         }
 
         // event charge
